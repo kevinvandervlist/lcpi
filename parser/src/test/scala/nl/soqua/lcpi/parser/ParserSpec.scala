@@ -76,20 +76,15 @@ class ParserSpec extends WordSpec with Matchers {
     "[I] parse an identity function" in {
       "λx.x" >> λ(x, V(x))
     }
+    "[K] parse a K-function" in {
+      "λx.λy.x" >> λ(x, λ(y, V(x)))
+    }
+    "[S] parse an S-function" in {
+      "λx.λy.λz.x z (y z)" >> λ(x, λ(y, λ(z, A(V(x), A(V(z), A(V(y), V(z)))))))
+    }
     "[Y] parse the y-combinator function" in {
       val g = Literal("g")
       "λg.(λx.g (x x)) (λx.g (x x))" >> λ(g, A(λ(x, A(V(g), A(V(x), V(x)))), λ(x, A(V(g), A(V(x), V(x))))))
     }
   }
 }
-
-//I := λx.x
-//K := λx.λy.x
-//S := λx.λy.λz.x z (y z)
-//B := λx.λy.λz.x (y z)
-//C := λx.λy.λz.x z y
-//W := λx.λy.x y y
-//U := λx.λy.y (x x y)
-//ω := λx.x x
-//Ω := ω ω
-//Y := λg.(λx.g (x x)) (λx.g (x x))
