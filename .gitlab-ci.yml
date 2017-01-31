@@ -1,0 +1,14 @@
+image: hseeberger/scala-sbt:latest
+
+before_script:
+  - export TZ=Europe/Amsterdam
+
+stages:
+  - build
+
+sbt-test:
+  stage: build
+  script:
+    - sbt test
+  tags:
+    - docker
