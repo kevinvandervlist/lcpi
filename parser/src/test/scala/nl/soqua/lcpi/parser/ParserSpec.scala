@@ -23,7 +23,6 @@ class ParserSpec extends WordSpec with Matchers {
 
   "A parser" should {
     "abc" in {
-      //      "(λx.λy.x)(λy.y)(λx.x)" >> V(x)
       "\\x.x" >> λ(x, V(x))
     }
     "parse a simple variable" in {

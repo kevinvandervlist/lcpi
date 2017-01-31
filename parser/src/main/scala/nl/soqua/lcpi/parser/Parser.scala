@@ -43,7 +43,7 @@ object Parser extends RegexParsers with PackratParsers {
   }
 
   lazy val parseLiteral: P[Literal] = positioned {
-    "[a-z]+".r ^^ (str => Literal(str))
+    "[a-z][a-zA-Z0-9]*".r ^^ (str => Literal(str))
   }
 
   lazy val parseLambda: P[Term] = positioned {
