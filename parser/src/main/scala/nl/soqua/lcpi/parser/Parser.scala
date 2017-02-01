@@ -13,6 +13,8 @@ object Parser extends RegexParsers with PackratParsers {
 
   override val whiteSpace: Regex = "[\t\r\f\n]+".r
 
+  private val gap = "\\s+".r
+
   def apply(source: String): Either[ParserError, Term] = {
     parse(parseProgram, new PackratReader(new CharSequenceReader(source))) match {
       case NoSuccess(msg, next) => Left(ParserError(msg, next.pos))
@@ -37,8 +39,8 @@ object Parser extends RegexParsers with PackratParsers {
   }
 
   lazy val parseApplication: P[Term] = positioned {
-    val spaceSeparated = (expression <~ " ") ~ expression ^^ { case t ~ s => Application(t, s)}
-    val disambiguationForcedByQuotes = expression ~ ("(" ~> expression <~ ")") ^^ { case t ~ s => Application(t, s)}
+    val spaceSeparated = (expression <~ gap) ~ expression ^^ { case t ~ s => Application(t, s) }
+    val disambiguationForcedByQuotes = expression ~ ("(" ~> expression <~ ")") ^^ { case t ~ s => Application(t, s) }
     spaceSeparated | disambiguationForcedByQuotes
   }
 
@@ -47,8 +49,9 @@ object Parser extends RegexParsers with PackratParsers {
   }
 
   lazy val parseLambda: P[Term] = positioned {
-    ("λ" | "\\") ~> (parseLiteral <~ ".") ~ expression ^^ {
-      case v ~ t => Lambda(v, t)
+    ("λ" | "\\") ~> ((parseLiteral ~ (gap ~> parseLiteral).*) <~ ".") ~ expression ^^ {
+      case v ~ Nil ~ t => Lambda(v, t)
+      case v ~ o ~ t => (v :: o).foldRight(t)((lit, acc) => Lambda(lit, acc))
     }
   }
 }

@@ -37,6 +37,12 @@ class ParserSpec extends WordSpec with Matchers {
     "parse a nested function" in {
       "λx.λx.x" >> λ(x, λ(x, V(x)))
     }
+    "parse functions with shorthand of multiple parameters" in {
+      "λx y.x" >> λ(x, λ(y, V(x)))
+    }
+    "parse nested functions with shorthands" in {
+      "λx y z.x" >> λ(x, λ(y, λ(z, V(x))))
+    }
     "parse a constant function" in {
       "λx.y" >> λ(x, V(y))
     }
