@@ -1,14 +1,14 @@
 package nl.soqua.lcpi.parser
 
-import nl.soqua.lcpi.ast.{Literal, Term}
+import nl.soqua.lcpi.ast.Expression
 import org.scalatest.{Matchers, WordSpec}
 
 class ParserSpec extends WordSpec with Matchers {
 
-  import nl.soqua.lcpi.ast.Term._
+  import nl.soqua.lcpi.ast.Expression._
 
   private implicit class Parse(val expr: String) extends Matchers {
-    def >>(term: Term): Unit =
+    def >>(term: Expression): Unit =
       Parser(expr).fold(ex => {
         fail(s"Parsing of expression $expr failed: $ex")
       }, res => {
@@ -16,80 +16,86 @@ class ParserSpec extends WordSpec with Matchers {
       })
   }
 
-  val x = Literal("x")
-  val y = Literal("y")
-  val z = Literal("z")
-  val xyz = Literal("xyz")
+  val x = V("x")
+  val y = V("y")
+  val z = V("z")
+  val xyz = V("xyz")
 
   "A parser" should {
     "abc" in {
-      "\\x.x" >> λ(x, V(x))
+      "\\x.x" >> λ(x, x)
     }
     "parse a simple variable" in {
-      "x" >> V(x)
+      "x" >> x
     }
     "parse a longer variable" in {
-      "xyz" >> V(xyz)
+      "xyz" >> xyz
     }
     "parse an identity function" in {
-      "\\xyz.xyz" >> λ(xyz, V(xyz))
+      "\\xyz.xyz" >> λ(xyz, xyz)
     }
     "parse a nested function" in {
-      "λx.λx.x" >> λ(x, λ(x, V(x)))
+      "λx.λx.x" >> λ(x, λ(x, x))
     }
     "parse functions with shorthand of multiple parameters" in {
-      "λx y.x" >> λ(x, λ(y, V(x)))
+      "λx y.x" >> λ(x, λ(y, x))
     }
     "parse nested functions with shorthands" in {
-      "λx y z.x" >> λ(x, λ(y, λ(z, V(x))))
+      "λx y z.x" >> λ(x, λ(y, λ(z, x)))
     }
     "parse a constant function" in {
-      "λx.y" >> λ(x, V(y))
+      "λx.y" >> λ(x, y)
     }
     "parse a parenthesized function" in {
-      "(λx.((λy.z)))" >> λ(x, λ(y, V(z)))
+      "(λx.((λy.z)))" >> λ(x, λ(y, z))
     }
     "parse a simple application" in {
-      "(x y)" >> A(V(x), V(y))
+      "(x y)" >> A(x, y)
     }
     "parse a more complex example of application" in {
-      "((λx.x) (λy.y))" >> A(λ(x, V(x)), λ(y, V(y)))
+      "((λx.x) (λy.y))" >> A(λ(x, x), λ(y, y))
     }
     "parse a more complex example of application without parens" in {
-      "(λx.x) (λy.y)" >> A(λ(x, V(x)), λ(y, V(y)))
+      "(λx.x) (λy.y)" >> A(λ(x, x), λ(y, y))
     }
     "parse application of a function and a variable" in {
-      "λx.(x y)" >> λ(x, A(V(x), V(y)))
+      "λx.(x y)" >> λ(x, A(x, y))
     }
   }
   "Church numerals" should {
-    val f = Literal("f")
+    val f = V("f")
     "parse 0" in {
-      "λf.λx.x" >> λ(f, λ(x, V(x)))
+      "λf.λx.x" >> λ(f, λ(x, x))
     }
     "parse 1" in {
-      "λf.λx.f x" >> λ(f, λ(x, A(V(f), V(x))))
+      "λf.λx.f x" >> λ(f, λ(x, A(f, x)))
     }
     "parse 2" in {
-      "λf.λx.f (f x)" >> λ(f, λ(x, A(V(f), A(V(f), V(x)))))
+      "λf.λx.f (f x)" >> λ(f, λ(x, A(f, A(f, x))))
     }
     "parse 2 (condensed notation)" in {
-      "λf.λx.f(f x)" >> λ(f, λ(x, A(V(f), A(V(f), V(x)))))
+      "λf x.f(f x)" >> λ(f, λ(x, A(f, A(f, x))))
     }
   }
   "Well known functions" should {
     "[I] parse an identity function" in {
-      "λx.x" >> λ(x, V(x))
+      "λx.x" >> λ(x, x)
+    }
+    "[T] truth combinator" in {
+      "λx y.x" >> λ(x, λ(y, x))
+    }
+    "[F] truth combinator" in {
+      "λx y.y" >> λ(x, λ(y, y))
     }
     "[K] parse a K-function" in {
-      "λx.λy.x" >> λ(x, λ(y, V(x)))
+      "λx.λy.x" >> λ(x, λ(y, x))
     }
     "[S] parse an S-function" in {
-      "λx.λy.λz.x z (y z)" >> λ(x, λ(y, λ(z, A(V(x), A(V(z), A(V(y), V(z)))))))
+      "λx.λy.λz.x z (y z)" >> λ(x, λ(y, λ(z, A(x, A(z, A(y, z))))))
     }
     "[Y] parse the y-combinator function" in {
-      val g = Literal("g")
-      "λg.(λx.g (x x)) (λx.g (x x))" >> λ(g, A(λ(x, A(V(g), A(V(x), V(x)))), λ(x, A(V(g), A(V(x), V(x))))))
+      val g = V("g")
+      "λg.(λx.g (x x)) (λx.g (x x))" >> λ(g, A(λ(x, A(g, A(x, x))), λ(x, A(g, A(x, x)))))
     }
   }
 }

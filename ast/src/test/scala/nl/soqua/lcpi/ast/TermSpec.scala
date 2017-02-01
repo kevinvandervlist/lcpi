@@ -4,37 +4,32 @@ import org.scalatest.{Matchers, WordSpec}
 
 class TermSpec extends WordSpec with Matchers {
 
-  import Term._
+  import Expression._
 
-  val x = Literal("x")
-  val y = Literal("y")
+  val x = V("x")
+  val y = V("y")
 
   "Definition of variables" should {
     "be fine" in {
-      V(x) shouldBe a[Variable]
+      x shouldBe a[Variable]
     }
     "be identitical" in {
-      V(x) shouldBe V(x)
+      x shouldBe x
     }
     "have proper equivalence" in {
-      val a = V(x)
-      val b = V(x)
-      val c = V(y)
-      a shouldBe b
-      b shouldBe a
-      a should not be c
-      c should not be a
+      V("x") should not be y
+      y should not be x
     }
   }
   "Definition of λ" should {
     "be possible from a term and a body" in {
-      λ(x, V(x)) shouldBe a[Lambda]
+      λ(x, x) shouldBe a[LambdaAbstraction]
     }
   }
   "Definition of application" should {
     "be possible" in {
-      val id = λ(x, V(x))
-      A(id, V(y)) shouldBe a[Application]
+      val id = λ(x, x)
+      A(id, y) shouldBe a[Application]
     }
   }
 }

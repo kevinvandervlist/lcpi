@@ -1,7 +1,7 @@
 package nl.soqua.lcpi.interpreter
 
-import nl.soqua.lcpi.ast.Term
+import nl.soqua.lcpi.ast.Expression
 
 object Interpreter {
-  def apply(ctx: Context, term: Term): Either[InterpreterError, Term] = Left(InterpreterError("abc"))
+  def apply(ctx: Context, term: Expression): Either[InterpreterError, Expression] = Left(InterpreterError("abc"))
 }

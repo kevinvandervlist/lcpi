@@ -15,43 +15,39 @@ object Parser extends RegexParsers with PackratParsers {
 
   private val gap = "\\s+".r
 
-  def apply(source: String): Either[ParserError, Term] = {
+  def apply(source: String): Either[ParserError, Expression] = {
     parse(parseProgram, new PackratReader(new CharSequenceReader(source))) match {
       case NoSuccess(msg, next) => Left(ParserError(msg, next.pos))
       case Success(p, _) => Right(p)
     }
   }
 
-  lazy val parseProgram: P[Term] = positioned {
+  lazy val parseProgram: P[Expression] = positioned {
     phrase(expression)
   }
 
-  lazy val expression: P[Term] = positioned {
+  lazy val expression: P[Expression] = positioned {
     parseApplication | parenthesizedExpression | parseLambda | parseVariable
   }
 
-  lazy val parenthesizedExpression: P[Term] = positioned {
+  lazy val parenthesizedExpression: P[Expression] = positioned {
     "(" ~> expression <~ ")"
   }
 
-  lazy val parseVariable: P[Term] = positioned {
-    parseLiteral ^^ { s => Variable(s) }
+  lazy val parseVariable: P[Variable] = positioned {
+    "[a-z][a-zA-Z0-9]*".r ^^ (str => Variable(str))
   }
 
-  lazy val parseApplication: P[Term] = positioned {
+  lazy val parseApplication: P[Expression] = positioned {
     val spaceSeparated = (expression <~ gap) ~ expression ^^ { case t ~ s => Application(t, s) }
     val disambiguationForcedByQuotes = expression ~ ("(" ~> expression <~ ")") ^^ { case t ~ s => Application(t, s) }
     spaceSeparated | disambiguationForcedByQuotes
   }
 
-  lazy val parseLiteral: P[Literal] = positioned {
-    "[a-z][a-zA-Z0-9]*".r ^^ (str => Literal(str))
-  }
-
-  lazy val parseLambda: P[Term] = positioned {
-    ("λ" | "\\") ~> ((parseLiteral ~ (gap ~> parseLiteral).*) <~ ".") ~ expression ^^ {
-      case v ~ Nil ~ t => Lambda(v, t)
-      case v ~ o ~ t => (v :: o).foldRight(t)((lit, acc) => Lambda(lit, acc))
+  lazy val parseLambda: P[Expression] = positioned {
+    ("λ" | "\\") ~> ((parseVariable ~ (gap ~> parseVariable).*) <~ ".") ~ expression ^^ {
+      case v ~ Nil ~ t => LambdaAbstraction(v, t)
+      case v ~ o ~ t => (v :: o).foldRight(t)((lit, acc) => LambdaAbstraction(lit, acc))
     }
   }
 }
