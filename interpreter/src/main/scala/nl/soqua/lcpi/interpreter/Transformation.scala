@@ -70,6 +70,12 @@ object Transformation {
 
   def eta(e: Expression): Expression = η(e)
 
+  def asString(e: Expression): String = e match {
+    case v: Variable => v.symbol
+    case Application(t, s) => s"(${asString(t)} ${asString(s)})"
+    case LambdaAbstraction(x, a) => s"λ${asString(x)}.${asString(a)}"
+  }
+
   /**
     * Extract all variables from a lambda expression
     *
