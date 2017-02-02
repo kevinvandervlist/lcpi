@@ -1,10 +1,11 @@
 package nl.soqua.lcpi.ast
 
+import nl.soqua.lcpi.ast.lambda.{Application, LambdaAbstraction, Variable}
 import org.scalatest.{Matchers, WordSpec}
 
 class TermSpec extends WordSpec with Matchers {
 
-  import Expression._
+  import nl.soqua.lcpi.ast.lambda.Expression._
 
   val x = V("x")
   val y = V("y")

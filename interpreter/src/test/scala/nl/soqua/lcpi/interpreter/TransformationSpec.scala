@@ -1,6 +1,6 @@
 package nl.soqua.lcpi.interpreter
 
-import nl.soqua.lcpi.ast.Expression.{A, V, λ}
+import nl.soqua.lcpi.ast.lambda.Expression.{A, V, λ}
 import org.scalatest.{Matchers, WordSpec}
 
 class TransformationSpec extends WordSpec with Matchers {

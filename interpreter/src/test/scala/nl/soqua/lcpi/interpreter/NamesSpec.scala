@@ -1,6 +1,6 @@
 package nl.soqua.lcpi.interpreter
 
-import nl.soqua.lcpi.ast.Variable
+import nl.soqua.lcpi.ast.lambda.Variable
 import org.scalatest.{Matchers, WordSpec}
 
 class NamesSpec extends WordSpec with Matchers {

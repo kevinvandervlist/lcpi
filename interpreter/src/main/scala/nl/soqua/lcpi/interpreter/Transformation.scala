@@ -1,6 +1,6 @@
 package nl.soqua.lcpi.interpreter
 
-import nl.soqua.lcpi.ast.{Application, Expression, LambdaAbstraction, Variable}
+import nl.soqua.lcpi.ast.lambda.{Application, Expression, LambdaAbstraction, Variable}
 
 object Transformation {
 

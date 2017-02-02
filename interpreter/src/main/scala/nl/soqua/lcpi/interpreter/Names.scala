@@ -1,6 +1,6 @@
 package nl.soqua.lcpi.interpreter
 
-import nl.soqua.lcpi.ast.Variable
+import nl.soqua.lcpi.ast.lambda.Variable
 
 object Names {
   private val preferedAlphabet: List[Variable] = ('a' to 'z').map(c => Variable(c.toString)).toList

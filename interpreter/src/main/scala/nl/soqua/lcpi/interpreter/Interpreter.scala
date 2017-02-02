@@ -1,7 +1,8 @@
 package nl.soqua.lcpi.interpreter
 
-import nl.soqua.lcpi.ast.Expression
-import nl.soqua.lcpi.parser.{Parser, ParserError}
+import nl.soqua.lcpi.ast.lambda.Expression
+import nl.soqua.lcpi.parser.ParserError
+import nl.soqua.lcpi.parser.lambda.LambdaCalcParser
 
 object Interpreter {
 
@@ -9,7 +10,7 @@ object Interpreter {
 
   def apply(ctx: Context, expression: String): Either[InterpreterError, Expression] = {
     val e = for {
-      p <- Parser(expression)
+      p <- LambdaCalcParser(expression)
       i <- Interpreter(ctx, p)
     } yield i
     e.left.map({

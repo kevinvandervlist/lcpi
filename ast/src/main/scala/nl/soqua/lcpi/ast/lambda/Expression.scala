@@ -1,4 +1,4 @@
-package nl.soqua.lcpi.ast
+package nl.soqua.lcpi.ast.lambda
 
 object Expression {
   def V(symbol: String): Variable = Variable(symbol)

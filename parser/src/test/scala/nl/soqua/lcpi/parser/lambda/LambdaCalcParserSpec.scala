@@ -1,15 +1,15 @@
-package nl.soqua.lcpi.parser
+package nl.soqua.lcpi.parser.lambda
 
-import nl.soqua.lcpi.ast.Expression
+import nl.soqua.lcpi.ast.lambda.Expression
 import org.scalatest.{Matchers, WordSpec}
 
-class ParserSpec extends WordSpec with Matchers {
+class LambdaCalcParserSpec extends WordSpec with Matchers {
 
-  import nl.soqua.lcpi.ast.Expression._
+  import Expression._
 
   private implicit class Parse(val expr: String) extends Matchers {
     def >>(term: Expression): Unit =
-      Parser(expr).fold(ex => {
+      LambdaCalcParser(expr).fold(ex => {
         fail(s"Parsing of expression $expr failed: $ex")
       }, res => {
         res shouldBe term

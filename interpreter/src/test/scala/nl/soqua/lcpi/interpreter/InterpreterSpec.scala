@@ -1,11 +1,11 @@
 package nl.soqua.lcpi.interpreter
 
-import nl.soqua.lcpi.ast.Expression
+import nl.soqua.lcpi.ast.lambda.Expression
 import org.scalatest.{Matchers, WordSpec}
 
 class InterpreterSpec extends WordSpec with Matchers {
 
-  import nl.soqua.lcpi.ast.Expression._
+  import Expression._
 
   private implicit class Parse(val expr: String) extends Matchers {
     def >>(term: Expression): Unit = {
