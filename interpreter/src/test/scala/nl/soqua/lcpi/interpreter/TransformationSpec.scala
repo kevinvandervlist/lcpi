@@ -58,12 +58,27 @@ class TransformationSpec extends WordSpec with Matchers {
     }
   }
   "β-reduction" should {
+    val a = V("a")
+    val b = V("b")
+    val c = V("c")
+    val d = V("d")
+    val f = V("f")
+    "reduce exr => value" in {
+      β(A(λ(x, x), z)) shouldBe z
+    }
+    "reduce A(λ(x, A(f, x)), a) => A(f, a)" in {
+      β(A(λ(x, A(f, x)), a)) shouldBe A(f, a)
+    }
     "work with a simple function" in {
       β(A(λ(x, x), x)) shouldBe x
     }
-    "work with (λx.x λ(y y))" in {
-      val reduced = β(A(λ(x, x), λ(y,y)))
-      println(reduced)
+    "work with (λx.(x x) λx.(x x)) -- should reduce to itself" in {
+      val lambda = A(λ(x, A(x, x)), λ(x,A(x, x)))
+      val reduced = β(lambda)
+      reduced shouldBe lambda
+    }
+    "do multi-step β reduction" in {
+      β(A(λ(x, x), A(λ(x, x), x))) shouldBe x
     }
     "work with a complex example as well" in {
       val reduced = β(A(A(λ(x, λ(y, A(y, x))), λ(x, x)), V("1")))

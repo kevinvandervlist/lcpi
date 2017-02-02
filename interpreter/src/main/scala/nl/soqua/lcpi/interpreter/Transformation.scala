@@ -2,8 +2,6 @@ package nl.soqua.lcpi.interpreter
 
 import nl.soqua.lcpi.ast.{Application, Expression, LambdaAbstraction, Variable}
 
-import scala.annotation.tailrec
-
 object Transformation {
 
   import Names._
@@ -58,9 +56,9 @@ object Transformation {
 
   private def βReduction(e: Expression): Expression = e match {
     case v: Variable => v
-    case l: LambdaAbstraction => l
-    case Application(_: LambdaAbstraction, v: Variable) => v
-    case a: Application => a
+    case LambdaAbstraction(x, t) => LambdaAbstraction(x, β(t))
+    case Application(LambdaAbstraction(name, body), t) => sub(body, name, t)
+    case Application(s, t) => Application(β(s), β(t))
   }
 
   private def α(e: Expression, encountered: List[Variable]): Expression = e match {
@@ -98,6 +96,7 @@ object Transformation {
 
   /**
     * Return a Set of all bound variables of an expression
+    *
     * @param e The expression to analyze
     * @return A Set of bound variables
     */
