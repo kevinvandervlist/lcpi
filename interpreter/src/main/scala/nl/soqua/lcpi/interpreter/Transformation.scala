@@ -58,10 +58,17 @@ object Transformation {
     case v: Variable => v
     case LambdaAbstraction(x, t) => LambdaAbstraction(x, βReduction(t))
     case Application(LambdaAbstraction(name, body), t) => sub(body, name, t)
-    case Application(s, t) => Application(β(s), βReduction(t))
+    case Application(s, t) => Application(βReduction(s), βReduction(t))
   }
 
-  def η(e: Expression): Expression = ???
+  def η(e: Expression): Expression = e match {
+    case v: Variable => v
+    case LambdaAbstraction(x, t) => LambdaAbstraction(x, η(t))
+    case Application(LambdaAbstraction(n1, Application(expr, n2)), arg) if n1 == n2 => Application(η(expr), η(arg))
+    case Application(s, t) => Application(η(s), η(t))
+  }
+
+  def eta(e: Expression): Expression = η(e)
 
   /**
     * Extract all variables from a lambda expression

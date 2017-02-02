@@ -82,4 +82,9 @@ class TransformationSpec extends WordSpec with Matchers {
       println(reduced)
     }
   }
+  "η-reduction" should {
+    "deal with the canonical η-reduction rule" in {
+      η(A(λ(x, A(λ(y, y), x)), z)) shouldBe A(λ(y, y), z)
+    }
+  }
 }
