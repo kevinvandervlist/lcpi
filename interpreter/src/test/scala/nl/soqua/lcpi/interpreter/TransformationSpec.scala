@@ -31,7 +31,7 @@ class TransformationSpec extends WordSpec with Matchers {
   }
   "Substitution of expressions" should {
     "substitute y for z" in {
-      sub(λ(x, y), y, z) shouldBe λ(x, z)
+      substitute(λ(x, y), y, z) shouldBe λ(x, z)
     }
   }
   "Retrieving all variables of expressions" should {
@@ -59,9 +59,6 @@ class TransformationSpec extends WordSpec with Matchers {
   }
   "β-reduction" should {
     val a = V("a")
-    val b = V("b")
-    val c = V("c")
-    val d = V("d")
     val f = V("f")
     "reduce exr => value" in {
       β(A(λ(x, x), z)) shouldBe z

@@ -22,13 +22,13 @@ object Transformation {
     */
   def alpha(e: Expression): Expression = α(e)
 
-  def reduceWhile(pred: Expression => Boolean, e: Expression): Expression = {
-    val x = β(e)
-    if (pred(x)) {
-      x
-    } else {
-      reduceWhile(pred, x)
-    }
+  private def α(e: Expression, encountered: List[Variable]): Expression = e match {
+    case v: Variable => v
+    case Application(t, s) => Application(α(t, encountered), α(s, encountered))
+    case LambdaAbstraction(x, a) if encountered contains x =>
+      val replacement = unused(x, encountered)
+      α(LambdaAbstraction(replacement, sub(a, x, replacement)), encountered)
+    case LambdaAbstraction(x, a) => LambdaAbstraction(x, α(a, x :: encountered))
   }
 
   /**
@@ -56,19 +56,12 @@ object Transformation {
 
   private def βReduction(e: Expression): Expression = e match {
     case v: Variable => v
-    case LambdaAbstraction(x, t) => LambdaAbstraction(x, β(t))
+    case LambdaAbstraction(x, t) => LambdaAbstraction(x, βReduction(t))
     case Application(LambdaAbstraction(name, body), t) => sub(body, name, t)
-    case Application(s, t) => Application(β(s), β(t))
+    case Application(s, t) => Application(β(s), βReduction(t))
   }
 
-  private def α(e: Expression, encountered: List[Variable]): Expression = e match {
-    case v: Variable => v
-    case Application(t, s) => Application(α(t, encountered), α(s, encountered))
-    case LambdaAbstraction(x, a) if encountered contains x =>
-      val replacement = unused(x, encountered)
-      α(LambdaAbstraction(replacement, sub(a, x, replacement)), encountered)
-    case LambdaAbstraction(x, a) => LambdaAbstraction(x, α(a, x :: encountered))
-  }
+  def η(e: Expression): Expression = ???
 
   /**
     * Extract all variables from a lambda expression
@@ -105,7 +98,7 @@ object Transformation {
   /**
     * alias for `sub`
     */
-  def substitute(e: Expression, v: Variable, s: Expression): Expression = sub(e, v, s)
+  private[interpreter] def substitute(e: Expression, v: Variable, s: Expression): Expression = sub(e, v, s)
 
   /**
     * Given expression 'e', substitute a free variable 'v' with the new expression 's'
@@ -114,7 +107,7 @@ object Transformation {
     * @param v A variable to substitute
     * @param s A substitute that will replace v
     */
-  def sub(e: Expression, v: Variable, s: Expression): Expression = e match {
+  private[interpreter] def sub(e: Expression, v: Variable, s: Expression): Expression = e match {
     case vp: Variable if vp == v => s
     case vp: Variable => vp
     case Application(l, r) => Application(sub(l, v, s), sub(r, v, s))
