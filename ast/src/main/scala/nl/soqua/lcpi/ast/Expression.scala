@@ -1,7 +1,5 @@
 package nl.soqua.lcpi.ast
 
-import scala.util.parsing.input.Positional
-
 object Expression {
   def V(symbol: String): Variable = Variable(symbol)
 
@@ -12,7 +10,7 @@ object Expression {
   def A(t: Expression, s: Expression): Expression = Application(t, s)
 }
 
-sealed trait Expression extends Positional
+sealed trait Expression
 
 case class Variable(symbol: String) extends Expression
 

@@ -22,29 +22,23 @@ object Parser extends RegexParsers with PackratParsers {
     }
   }
 
-  lazy val parseProgram: P[Expression] = positioned {
-    phrase(expression)
-  }
+  lazy val parseProgram: P[Expression] = phrase(expression)
 
-  lazy val expression: P[Expression] = positioned {
+  lazy val expression: P[Expression] = {
     parseApplication | parenthesizedExpression | parseLambda | parseVariable
   }
 
-  lazy val parenthesizedExpression: P[Expression] = positioned {
-    "(" ~> expression <~ ")"
-  }
+  lazy val parenthesizedExpression: P[Expression] = "(" ~> expression <~ ")"
 
-  lazy val parseVariable: P[Variable] = positioned {
-    "[a-z][a-zA-Z0-9]*".r ^^ (str => Variable(str))
-  }
+  lazy val parseVariable: P[Variable] = "[a-z][a-zA-Z0-9]*".r ^^ (str => Variable(str))
 
-  lazy val parseApplication: P[Expression] = positioned {
+  lazy val parseApplication: P[Expression] = {
     val spaceSeparated = (expression <~ gap) ~ expression ^^ { case t ~ s => Application(t, s) }
     val disambiguationForcedByQuotes = expression ~ ("(" ~> expression <~ ")") ^^ { case t ~ s => Application(t, s) }
     spaceSeparated | disambiguationForcedByQuotes
   }
 
-  lazy val parseLambda: P[Expression] = positioned {
+  lazy val parseLambda: P[Expression] = {
     ("λ" | "\\") ~> ((parseVariable ~ (gap ~> parseVariable).*) <~ ".") ~ expression ^^ {
       case v ~ Nil ~ t => LambdaAbstraction(v, t)
       case v ~ o ~ t => (v :: o).foldRight(t)((lit, acc) => LambdaAbstraction(lit, acc))
