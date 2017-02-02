@@ -2,6 +2,8 @@ package nl.soqua.lcpi.interpreter
 
 import nl.soqua.lcpi.ast.{Application, Expression, LambdaAbstraction, Variable}
 
+import scala.annotation.tailrec
+
 object Transformation {
 
   import Names._
@@ -13,6 +15,53 @@ object Transformation {
     * @return A rewritten expression.
     */
   def α(e: Expression): Expression = α(e, List.empty)
+
+  /**
+    * Alias for `α`
+    *
+    * @param e The expression to rewrite
+    * @return A rewritten expression
+    */
+  def alpha(e: Expression): Expression = α(e)
+
+  def reduceWhile(pred: Expression => Boolean, e: Expression): Expression = {
+    val x = β(e)
+    if (pred(x)) {
+      x
+    } else {
+      reduceWhile(pred, x)
+    }
+  }
+
+  /**
+    * Beta reduction.
+    *
+    * @param e
+    * @return
+    */
+  def β(e: Expression): Expression = {
+    val x = βReduction(e)
+    if (x == e) {
+      x
+    } else {
+      βReduction(x)
+    }
+  }
+
+  /**
+    * Alias for `β`
+    *
+    * @param e The expression to rewrite
+    * @return A rewritten expression
+    */
+  def beta(e: Expression): Expression = β(e)
+
+  private def βReduction(e: Expression): Expression = e match {
+    case v: Variable => v
+    case l: LambdaAbstraction => l
+    case Application(_: LambdaAbstraction, v: Variable) => v
+    case a: Application => a
+  }
 
   private def α(e: Expression, encountered: List[Variable]): Expression = e match {
     case v: Variable => v
@@ -27,25 +76,32 @@ object Transformation {
     * Extract all variables from a lambda expression
     *
     * @param e The expression
-    * @return A list of variables
+    * @return A Set of variables
     */
-  def vars(e: Expression): List[Variable] = e match {
-    case v: Variable => List(v)
+  def vars(e: Expression): Set[Variable] = e match {
+    case v: Variable => Set(v)
     case Application(t, s) => vars(t) union vars(s)
-    case LambdaAbstraction(x, a) => x :: vars(a)
+    case LambdaAbstraction(x, a) => vars(a) + x
   }
 
   /**
-    * Find a list of free variables in a given expression
+    * Find a Set of free variables in a given expression
     *
     * @param e The expression to find free variables in
-    * @return A list of variables that are free.
+    * @return A Set of variables that are free.
     */
-  def free(e: Expression): List[Variable] = e match {
-    case v: Variable => List(v)
+  def free(e: Expression): Set[Variable] = e match {
+    case v: Variable => Set(v)
     case Application(t, s) => free(t) union free(s)
     case LambdaAbstraction(x, a) => free(a) filterNot (v => v == x)
   }
+
+  /**
+    * Return a Set of all bound variables of an expression
+    * @param e The expression to analyze
+    * @return A Set of bound variables
+    */
+  def bound(e: Expression): Set[Variable] = vars(e) diff free(e)
 
   /**
     * alias for `sub`

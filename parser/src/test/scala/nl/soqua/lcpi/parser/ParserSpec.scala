@@ -16,6 +16,8 @@ class ParserSpec extends WordSpec with Matchers {
       })
   }
 
+  val arg = V("a")
+  val f = V("f")
   val x = V("x")
   val y = V("y")
   val z = V("z")
@@ -63,7 +65,6 @@ class ParserSpec extends WordSpec with Matchers {
     }
   }
   "Church numerals" should {
-    val f = V("f")
     "parse 0" in {
       "λf.λx.x" >> λ(f, λ(x, x))
     }
@@ -80,6 +81,12 @@ class ParserSpec extends WordSpec with Matchers {
   "Well known functions" should {
     "[I] parse an identity function" in {
       "λx.x" >> λ(x, x)
+    }
+    "self-apply" in {
+      "λx.(x x)" >> λ(x, A(x, x))
+    }
+    "apply" in {
+      "λf.λa.(f a)" >> λ(f, λ(arg, A(f, arg)))
     }
     "[T] truth combinator" in {
       "λx y.x" >> λ(x, λ(y, x))
