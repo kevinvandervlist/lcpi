@@ -41,7 +41,7 @@ object LambdaCalcParser extends RegexParsers with LambdaCalcParserRules {
 
   def apply(source: String): Either[ParserError, Expression] = {
     parse(parseProgram, new PackratReader(new CharSequenceReader(source))) match {
-      case NoSuccess(msg, next) => Left(ParserError(msg, next.pos))
+      case NoSuccess(msg, _) => Left(ParserError(msg))
       case Success(p, _) => Right(p)
     }
   }

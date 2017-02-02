@@ -27,7 +27,7 @@ object ReplParser extends ReplParserRules {
 
   def apply(source: String): Either[ParserError, ReplExpression] = {
     parse(parseLine, new PackratReader(new CharSequenceReader(source))) match {
-      case NoSuccess(msg, next) => Left(ParserError(msg, next.pos))
+      case NoSuccess(msg, _) => Left(ParserError(msg))
       case Success(p, _) => Right(p)
     }
   }
