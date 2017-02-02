@@ -8,7 +8,7 @@ import scala.language.postfixOps
 class IsomorphismSpec extends WordSpec with Matchers {
 
   private implicit class Parse(val expr: String) extends Matchers {
-    def is(o: Any): Assertion = this.≅
+    def is(o: Any): Assertion = ≅
 
     def ≅ : Assertion = {
       val result = for {
@@ -32,8 +32,13 @@ class IsomorphismSpec extends WordSpec with Matchers {
       "λx.λy.λz.x z (y z)" is isomorphic
     }
     "have an isomorphic Y-combinator" in {
-      // TODO: FIX ME I AM BROKEN
-      //"λg.(λx.g (x x)) (λx.g (x x))".is isomorphic
+      "λf.(λx.f (x x)) (λx.f (x x))" is isomorphic
+    }
+    "have an isomorphic truth function" in {
+      "λx y.y" is isomorphic
+    }
+    "be isomorphic for church numeral 2" in {
+      "λf.λx.f (f x)" is isomorphic
     }
   }
 }

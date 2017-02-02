@@ -77,6 +77,11 @@ class TransformationSpec extends WordSpec with Matchers {
     "do multi-step β reduction" in {
       β(A(λ(x, x), A(λ(x, x), x))) shouldBe x
     }
+    "beta-reduce Y-combinator properly" in {
+      // TODO: validate if AST is correct
+      val yc = λ(f, A(λ(x, A(f, A(x, x))), λ(x, A(f, A(x, x)))))
+      β(A(yc, z)) shouldBe A(z, A(yc, z))
+    }
   }
   "η-reduction" should {
     "deal with the canonical η-reduction rule" in {

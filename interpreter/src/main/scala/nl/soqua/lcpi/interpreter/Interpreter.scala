@@ -29,7 +29,11 @@ object Interpreter {
   } yield i
 
   def apply(ctx: Context, term: Expression): Either[InterpreterError, Expression] = {
-    val normalized = List(α _, β _, η _).foldLeft(term)((t, f) => f(t))
+    // First retrieve any variables that are stored in the context
+    val substituted = ctx.foldLeft(term)((t, v, f) => Transformation.substitute(t, v, f))
+    // Then normalize them
+    val normalized = List(α _, β _, η _).foldLeft(substituted)((t, f) => f(t))
+    
     Right(normalized)
   }
 }
