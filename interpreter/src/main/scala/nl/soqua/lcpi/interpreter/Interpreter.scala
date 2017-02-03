@@ -21,6 +21,7 @@ object Interpreter {
       }).left
       .map({
         case ParserError(msg) => InterpreterError(s"Parser error occurred: $msg")
+        case e: InterpreterError => e
       })
 
   def apply(ctx: Context, line: String): Either[InterpreterError, Expression] = for {
@@ -32,7 +33,8 @@ object Interpreter {
     // First retrieve any variables that are stored in the context
     val substituted = ctx.foldLeft(term)((t, v, f) => Transformation.substitute(t, v, f))
     // Then normalize them
-    val normalized = List(α _, β _, η _).foldLeft(substituted)((t, f) => f(t))
+    //val normalized = List(α _, β _, η _).foldLeft(substituted)((t, f) => f(t))
+    val normalized = List(α _, β _, η _).foldRight(substituted)((f, t) => f(t))
 
     Right(normalized)
   }

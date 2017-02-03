@@ -9,7 +9,8 @@ object CombinatorLibrary {
   private val library = List(
     "I := λx.x",
     "T := λx.λy.x",
-    "F := λx.λy.y"
+    "F := λx.λy.y",
+    "Y := λf.(λx.(f(x x)) λx.(f(x x)))"
   )
 
   private def parseAndStore(ctx: Context, expr: String): Context = {

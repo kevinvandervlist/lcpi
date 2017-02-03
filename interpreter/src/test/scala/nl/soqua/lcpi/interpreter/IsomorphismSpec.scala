@@ -32,7 +32,7 @@ class IsomorphismSpec extends WordSpec with Matchers {
       "λx.λy.λz.x z (y z)" is isomorphic
     }
     "have an isomorphic Y-combinator" in {
-      "λf.(λx.f (x x)) (λx.f (x x))" is isomorphic
+      "λf.(λx.(f(x x)) λx.(f(x x)))" is isomorphic
     }
     "have an isomorphic truth function" in {
       "λx y.y" is isomorphic

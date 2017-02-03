@@ -23,7 +23,7 @@ object Main extends App {
       case Show => ctx.foreach((v, e) => println(s"${Transformation.asString(v)} := ${Transformation.asString(e)}"))
       case Reset => ctx = CombinatorLibrary loadIn Context()
       case Other(l) => Interpreter(ctx, l) match {
-        case Left(e) => System.err.println(s"error: $e")
+        case Left(e) => System.err.println(s"error: ${e.message}")
         case Right(e) => println(Transformation.asString(e))
       }
     }

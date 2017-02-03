@@ -13,7 +13,12 @@ object Options {
 
   def help: String =
     """
-      |Help:
+      |Notation:
+      |* λ is either a λ or a \. So both \x.x and λx.x are allowed.
+      |* You can assign variables; `I := λx.x` stores the identity function to the variable `I`.
+      |  These have to be capitalized.
+      |
+      |Available commands:
       |* `help` => show this message. Alias: `exit`.
       |* `quit` => quit the REPL.
       |* `show` => show the current REPL context.

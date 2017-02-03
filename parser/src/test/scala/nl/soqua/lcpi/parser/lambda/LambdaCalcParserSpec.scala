@@ -102,6 +102,7 @@ class LambdaCalcParserSpec extends WordSpec with Matchers {
     }
     "[Y] parse the y-combinator function" in {
       val g = V("g")
+      //"λf.(λx.(f(x x)) λx.(f(x x)))"
       // TODO: Validate the y-combinator, especially the AST
       "λg.(λx.g (x x)) (λx.g (x x))" >> λ(g, A(λ(x, A(g, A(x, x))), λ(x, A(g, A(x, x)))))
     }

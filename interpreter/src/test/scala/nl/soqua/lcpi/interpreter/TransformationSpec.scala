@@ -1,5 +1,6 @@
 package nl.soqua.lcpi.interpreter
 
+import nl.soqua.lcpi.ast.lambda.Expression
 import nl.soqua.lcpi.ast.lambda.Expression.{A, V, λ}
 import org.scalatest.{Matchers, WordSpec}
 
@@ -70,7 +71,7 @@ class TransformationSpec extends WordSpec with Matchers {
       β(A(λ(x, x), x)) shouldBe x
     }
     "work with (λx.(x x) λx.(x x)) -- should reduce to itself" in {
-      val lambda = A(λ(x, A(x, x)), λ(x,A(x, x)))
+      val lambda = A(λ(x, A(x, x)), λ(x, A(x, x)))
       val reduced = β(lambda)
       reduced shouldBe lambda
     }
@@ -78,9 +79,8 @@ class TransformationSpec extends WordSpec with Matchers {
       β(A(λ(x, x), A(λ(x, x), x))) shouldBe x
     }
     "beta-reduce Y-combinator properly" in {
-      // TODO: validate if AST is correct
-      val yc = λ(f, A(λ(x, A(f, A(x, x))), λ(x, A(f, A(x, x)))))
-      β(A(yc, z)) shouldBe A(z, A(yc, z))
+      val Y = λ(f, λ(x, A(A(f, A(x, x)), λ(x, A(f, A(x, x))))))
+      β(A(Y, z)) shouldBe A(z, A(Y, z))
     }
   }
   "η-reduction" should {
@@ -90,10 +90,10 @@ class TransformationSpec extends WordSpec with Matchers {
   }
   "asString" should {
     "correctly stringify t s" in {
-      asString(A(x,y)) shouldBe "(x y)"
+      asString(A(x, y)) shouldBe "(x y)"
     }
     "correctly stringify t s where t is a λx.x and s is y" in {
-      asString(A(λ(x,x),y)) shouldBe "((λx.x) y)"
+      asString(A(λ(x, x), y)) shouldBe "((λx.x) y)"
     }
   }
 }
