@@ -4,11 +4,19 @@ before_script:
   - export TZ=Europe/Amsterdam
 
 stages:
+  - test
   - build
 
 sbt-test:
-  stage: build
+  stage: test
   script:
     - sbt test
+  tags:
+    - docker
+
+sbt-assembly:
+  stage: build
+  script:
+    - sbt assembly
   tags:
     - docker

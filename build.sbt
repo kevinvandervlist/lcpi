@@ -5,6 +5,7 @@ lazy val commonSettings = Seq(
   name := "lcpi",
   version := "0.0.1-SNAPSHOT",
   scalaVersion := "2.12.1",
+  test in assembly := {}, // don't run tests on assembly
   scalacOptions ++= Seq(
     "-feature",
     "-Xfatal-warnings",
@@ -35,6 +36,6 @@ lazy val interpreter = (project in file("interpreter")).
   settings(commonSettings: _*).
   settings(
     name := "interpreter",
-    assemblyJarName in assembly := "interpreter.jar"
+    assemblyJarName in assembly := "interpreter.jar",
+    mainClass in assembly := Some("nl.soqua.lcpi.interpreter.Main")
   ).dependsOn(ast, parser)
-

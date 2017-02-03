@@ -1,8 +1,5 @@
 package nl.soqua.lcpi.interpreter
 
-import nl.soqua.lcpi.ast.lambda.Expression.λ
-import nl.soqua.lcpi.ast.lambda.Variable
-
 object Main extends App {
   var ctx = CombinatorLibrary loadIn Context()
 
