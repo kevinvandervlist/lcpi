@@ -88,4 +88,12 @@ class TransformationSpec extends WordSpec with Matchers {
       η(A(λ(x, A(λ(y, y), x)), z)) shouldBe A(λ(y, y), z)
     }
   }
+  "asString" should {
+    "correctly stringify t s" in {
+      asString(A(x,y)) shouldBe "(x y)"
+    }
+    "correctly stringify t s where t is a λx.x and s is y" in {
+      asString(A(λ(x,x),y)) shouldBe "((λx.x) y)"
+    }
+  }
 }

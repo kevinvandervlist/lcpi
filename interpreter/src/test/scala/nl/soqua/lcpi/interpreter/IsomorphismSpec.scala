@@ -40,5 +40,8 @@ class IsomorphismSpec extends WordSpec with Matchers {
     "be isomorphic for church numeral 2" in {
       "λf.λx.f (f x)" is isomorphic
     }
+    "be isomorphic with `t s` when t is a λ-abstraction" in {
+      "(λx.x) y" is isomorphic
+    }
   }
 }
