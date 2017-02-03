@@ -42,7 +42,7 @@ object Transformation {
     if (x == e) {
       x
     } else {
-      βReduction(x)
+      β(x)
     }
   }
 
