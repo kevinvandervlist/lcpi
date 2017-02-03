@@ -34,4 +34,13 @@ object Variables {
     * @return A Set of bound variables
     */
   def bound(e: Expression): Set[Variable] = vars(e) diff free(e)
+
+  /**
+    * Is the provided variable bound in the given expression?
+    *
+    * @param v The variable to check
+    * @param e The λ-expression to check
+    * @return A boolean indicating whether the variable is bound or not.
+    */
+  def isBound(v: Variable, e: Expression): Boolean = bound(e) contains v
 }

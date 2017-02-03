@@ -1,7 +1,7 @@
 package nl.soqua.lcpi.interpreter.transformation
 
 import nl.soqua.lcpi.ast.lambda.{Application, Expression, LambdaAbstraction, Variable}
-import Names.unused
+import nl.soqua.lcpi.interpreter.transformation.Names.unused
 
 object AlphaReduction {
 

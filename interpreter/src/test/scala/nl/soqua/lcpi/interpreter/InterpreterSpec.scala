@@ -1,7 +1,7 @@
 package nl.soqua.lcpi.interpreter
 
 import nl.soqua.lcpi.ast.lambda.Expression
-import nl.soqua.lcpi.interpreter.transformation.Stringify
+import nl.soqua.lcpi.interpreter.transformation.{AlphaReduction, Stringify}
 import org.scalatest.{Matchers, WordSpec}
 
 class InterpreterSpec extends WordSpec with Matchers {
@@ -12,15 +12,15 @@ class InterpreterSpec extends WordSpec with Matchers {
     def >>(expectedExpression: Expression)(implicit ctx: Context): Unit = {
       Interpreter(ctx, expr).fold(ex => {
         fail(s"Expression $expr failed: $ex")
-      }, res => {
+      }, actualExpression => {
         withClue(
           s"""
             |expressions are not equal. l >> r:
-            |got:      ${Stringify(res)}
+            |got:      ${Stringify(actualExpression)}
             |expected: ${Stringify(expectedExpression)}
             |---
           """.stripMargin) {
-          res shouldBe expectedExpression
+          actualExpression shouldBe expectedExpression
         }
       })
     }
@@ -76,7 +76,7 @@ class InterpreterSpec extends WordSpec with Matchers {
       // function call, and sadly an example for which my attempted solution fails)
     }
     "ex 9" in {
-      "((λa.(λb.(a (a (a b))))) (λc.(λd.(c (c d)))))" >> "(λa.(λb.(a (a (a (a (a (a (a (a b))))))))))"
+      "((λa.(λb.(a (a (a b))))) (λc.(λd.(c (c d)))))" >> "(λb.(λd.(b (b (b (b (b (b (b (b d))))))))))"
     }
     "ex 10" in {
       // capture-avoiding substitution!

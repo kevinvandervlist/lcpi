@@ -33,8 +33,7 @@ object Interpreter {
     // First retrieve any variables that are stored in the context
     val substituted = ctx.foldLeft(term)((t, v, f) => substitute(t, v, f))
     // Then normalize them
-    //val normalized = List(α _, β _, η _).foldLeft(substituted)((t, f) => f(t))
-    val normalized = List(α _, β _, η _).foldRight(substituted)((f, t) => f(t))
+    val normalized = List(α _, β _, η _).foldLeft(substituted)((t, f) => f(t))
 
     Right(normalized)
   }
