@@ -4,28 +4,25 @@ import nl.soqua.lcpi.ast.lambda.Expression.λ
 import nl.soqua.lcpi.ast.lambda.Variable
 
 object Main extends App {
-  var ctx = Context()
-
-  // TODO: Remove me later on.
-  ctx.assign(Variable("I"), λ(Variable("x"), Variable("x")))
+  var ctx = CombinatorLibrary loadIn Context()
 
   def drawShell(): Unit = print("λ ")
 
   println(
     """
-      |An explanation.
-      |
+      |A λ-calculus interpreter. Type `help` for usage information.
     """.stripMargin
   )
 
   drawShell()
 
   for (ln <- io.Source.stdin.getLines) {
-    ln match {
-      case "quit" => System.exit(0)
-      case "show" => ctx.foreach((v, e) => println(s"${Transformation.asString(v)} := ${Transformation.asString(e)}"))
-      case "reset" => ctx = Context()
-      case _ => Interpreter(ctx, ln) match {
+    Options(ln) match {
+      case Help => println(Options.help)
+      case Quit => System.exit(0)
+      case Show => ctx.foreach((v, e) => println(s"${Transformation.asString(v)} := ${Transformation.asString(e)}"))
+      case Reset => ctx = CombinatorLibrary loadIn Context()
+      case Other(l) => Interpreter(ctx, l) match {
         case Left(e) => System.err.println(s"error: $e")
         case Right(e) => println(Transformation.asString(e))
       }

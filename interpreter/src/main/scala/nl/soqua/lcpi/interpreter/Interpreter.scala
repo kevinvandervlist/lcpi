@@ -33,7 +33,7 @@ object Interpreter {
     val substituted = ctx.foldLeft(term)((t, v, f) => Transformation.substitute(t, v, f))
     // Then normalize them
     val normalized = List(α _, β _, η _).foldLeft(substituted)((t, f) => f(t))
-    
+
     Right(normalized)
   }
 }
