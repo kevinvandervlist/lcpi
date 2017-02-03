@@ -7,7 +7,7 @@ import nl.soqua.lcpi.parser.repl.ReplParser
 
 object Interpreter {
 
-  import Transformation.{α, β, η}
+  import transformation._
 
   private val existingVarError = InterpreterError("The given variable has already been assigned in the context")
 
@@ -31,7 +31,7 @@ object Interpreter {
 
   def apply(ctx: Context, term: Expression): Either[InterpreterError, Expression] = {
     // First retrieve any variables that are stored in the context
-    val substituted = ctx.foldLeft(term)((t, v, f) => Transformation.substitute(t, v, f))
+    val substituted = ctx.foldLeft(term)((t, v, f) => substitute(t, v, f))
     // Then normalize them
     //val normalized = List(α _, β _, η _).foldLeft(substituted)((t, f) => f(t))
     val normalized = List(α _, β _, η _).foldRight(substituted)((f, t) => f(t))

@@ -1,5 +1,6 @@
-package nl.soqua.lcpi.interpreter
+package nl.soqua.lcpi.interpreter.transformation
 
+import nl.soqua.lcpi.interpreter.transformation.Stringify._
 import nl.soqua.lcpi.parser.lambda.LambdaCalcParser
 import org.scalatest.{Assertion, Matchers, WordSpec}
 
@@ -13,7 +14,7 @@ class IsomorphismSpec extends WordSpec with Matchers {
     def ≅ : Assertion = {
       val result = for {
         p1 <- LambdaCalcParser(expr)
-        p2 <- LambdaCalcParser(Transformation.asString(p1))
+        p2 <- LambdaCalcParser(p1)
       } yield (p1, p2)
       result match {
         case Left(ex) => fail(s"Expression $expr failed: $ex")

@@ -1,4 +1,4 @@
-package nl.soqua.lcpi.interpreter
+package nl.soqua.lcpi.interpreter.transformation
 
 import nl.soqua.lcpi.ast.lambda.Variable
 
@@ -26,7 +26,7 @@ object Names {
     * @param known All currently known values
     * @return A new variable name
     */
-  def uniqueSuffix(v: Variable, known: List[Variable]): Variable = Stream
+  private[transformation] def uniqueSuffix(v: Variable, known: List[Variable]): Variable = Stream
       .from(0)
       .find(p => !known.contains(newVar(v, p)))
       .map(p => newVar(v, p))

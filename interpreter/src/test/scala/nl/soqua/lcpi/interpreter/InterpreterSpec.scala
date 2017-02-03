@@ -1,6 +1,7 @@
 package nl.soqua.lcpi.interpreter
 
 import nl.soqua.lcpi.ast.lambda.Expression
+import nl.soqua.lcpi.interpreter.transformation.Stringify
 import org.scalatest.{Matchers, WordSpec}
 
 class InterpreterSpec extends WordSpec with Matchers {
@@ -15,8 +16,8 @@ class InterpreterSpec extends WordSpec with Matchers {
         withClue(
           s"""
             |expressions are not equal. l >> r:
-            |got:      ${Transformation.asString(res)}
-            |expected: ${Transformation.asString(expectedExpression)}
+            |got:      ${Stringify(res)}
+            |expected: ${Stringify(expectedExpression)}
             |---
           """.stripMargin) {
           res shouldBe expectedExpression

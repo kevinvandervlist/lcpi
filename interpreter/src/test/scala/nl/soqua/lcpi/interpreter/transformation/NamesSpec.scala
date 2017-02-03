@@ -1,11 +1,11 @@
-package nl.soqua.lcpi.interpreter
+package nl.soqua.lcpi.interpreter.transformation
 
 import nl.soqua.lcpi.ast.lambda.Variable
 import org.scalatest.{Matchers, WordSpec}
 
 class NamesSpec extends WordSpec with Matchers {
 
-  import Names._
+  import nl.soqua.lcpi.interpreter.transformation.Names._
 
   "Generating unused variable names" should {
     val x = Variable("x")
