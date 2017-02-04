@@ -6,7 +6,7 @@ import org.scalatest.{Matchers, WordSpec}
 
 class DeBruijnIndexSpec extends WordSpec with Matchers {
 
-  import DeBruijnIndex.deBruijn
+  import DeBruijnIndex._
 
   val x = Expression.V("x")
   val y = Expression.V("y")
@@ -23,23 +23,28 @@ class DeBruijnIndexSpec extends WordSpec with Matchers {
 
   "Transforming to De Bruijn indexes" should {
     "work on the identity function" in {
-      deBruijn(λ(x, x)) shouldBe λ(_1)
+      index(λ(x, x)) shouldBe λ(_1)
     }
     "church truth" in {
-      deBruijn(λ(x, λ(y, x))) shouldBe λ(λ(_2))
+      index(λ(x, λ(y, x))) shouldBe λ(λ(_2))
     }
     "work on a more complex function" in {
-      val actual = deBruijn(λ(z, A(λ(y, A(y, λ(x, x))), λ(x, A(z, x)))))
+      val actual = index(λ(z, A(λ(y, A(y, λ(x, x))), λ(x, A(z, x)))))
       val expected = λ(A(λ(A(_1, λ(_1))), λ(A(_2, _1))))
-      withClue(
-        s"""
-           |expressions are not equal:
-           |got:      ${Stringify(actual)}
-           |expected: ${Stringify(expected)}
-           |---
-          """.stripMargin) {
-        actual shouldBe expected
-      }
+      actual shouldBe expected
+    }
+  }
+  "Reification names based on De Bruijn indexed lambdas" should {
+    "work on the identity function" in {
+      reification(λ(_1)) shouldBe λ(x, x)
+    }
+    "church truth" in {
+      reification(λ(λ(_2))) shouldBe λ(x, λ(y, x))
+    }
+    "work on a more complex function" in {
+      val actual = reification(λ(A(λ(A(_1, λ(_1))), λ(A(_2, _1)))))
+      val expected = λ(z, A(λ(y, A(y, λ(x, x))), λ(x, A(z, x))))
+      actual shouldBe expected
     }
   }
 }

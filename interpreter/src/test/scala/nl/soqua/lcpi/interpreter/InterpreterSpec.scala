@@ -1,7 +1,7 @@
 package nl.soqua.lcpi.interpreter
 
 import nl.soqua.lcpi.ast.lambda.Expression
-import nl.soqua.lcpi.interpreter.transformation.{AlphaReduction, Stringify}
+import nl.soqua.lcpi.interpreter.transformation.{AlphaReduction, DeBruijnIndex, Stringify}
 import org.scalatest.{Matchers, WordSpec}
 
 class InterpreterSpec extends WordSpec with Matchers {
@@ -20,7 +20,7 @@ class InterpreterSpec extends WordSpec with Matchers {
             |expected: ${Stringify(expectedExpression)}
             |---
           """.stripMargin) {
-          actualExpression shouldBe expectedExpression
+          DeBruijnIndex.index(actualExpression) shouldBe DeBruijnIndex.index(expectedExpression)
         }
       })
     }

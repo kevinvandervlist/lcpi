@@ -33,7 +33,7 @@ class AlphaReductionSpec extends WordSpec with Matchers {
            |expected: ${Stringify(expected)}
            |---
           """.stripMargin) {
-        alpha shouldBe expected
+        DeBruijnIndex.index(alpha) shouldBe DeBruijnIndex.index(expected)
       }
     }
   }
