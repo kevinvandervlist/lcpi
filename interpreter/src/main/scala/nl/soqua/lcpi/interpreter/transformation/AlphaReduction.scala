@@ -13,7 +13,7 @@ object AlphaReduction {
     * @param e The expression to rewrite
     * @return A rewritten expression.
     */
-  def α(e: Expression): Expression = α(e, List.empty)
+  def α(e: Expression): Expression = α(e, List.empty)._1
 
   /**
     * Alias for `α`
@@ -23,12 +23,21 @@ object AlphaReduction {
     */
   def alpha(e: Expression): Expression = α(e)
 
-  private def α(e: Expression, encountered: List[Variable]): Expression = e match {
-    case v: Variable => v
-    case Application(t, s) => Application(α(t, encountered), α(s, encountered))
+  /**
+    * depth-first alpha-reduction that keeps track of encountered variables.
+    */
+  private def α(e: Expression, encountered: List[Variable]): (Expression, List[Variable]) = e match {
+    case v: Variable => (v, encountered)
+    case Application(t, s) =>
+      val (t1, enc1) = α(t, encountered)
+      val (s1, enc2) = α(s, enc1)
+      (Application(t1, s1), enc2)
     case LambdaAbstraction(x, a) if encountered contains x =>
       val replacement = unused(x, encountered)
       α(LambdaAbstraction(replacement, substitute(a, x, replacement)), encountered)
-    case LambdaAbstraction(x, a) => LambdaAbstraction(x, α(a, x :: encountered))
+    case LambdaAbstraction(x, a) => {
+      val (body, enc1) = α(a, x :: encountered)
+      (LambdaAbstraction(x, body), enc1)
+    }
   }
 }

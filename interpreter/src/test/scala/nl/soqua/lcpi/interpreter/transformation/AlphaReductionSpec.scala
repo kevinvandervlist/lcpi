@@ -22,10 +22,10 @@ class AlphaReductionSpec extends WordSpec with Matchers {
     "work too" in {
       α(λ(x, λ(x, λ(x, x)))) shouldBe λ(x, λ(a, λ(b, b)))
     }
-    "complex" in {
+    "capture-avoiding substitution" in {
       val e = A(λ(f, λ(x, A(f, x))), λ(y, λ(x, y)))
       val alpha = AlphaReduction.α(e)
-      val expected = λ(x, λ(z, x))
+      val expected = A(λ(f, λ(x, A(f, x))), λ(y, λ(z, y)))
       withClue(
         s"""
            |expressions are not equal. l >> r:
