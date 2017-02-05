@@ -3,10 +3,12 @@ package nl.soqua.lcpi.interpreter.transformation
 import nl.soqua.lcpi.ast.lambda.{Application, Expression, LambdaAbstraction, Variable}
 
 import scala.language.implicitConversions
+import scala.util.Try
 
 object DeBruijnIndex {
 
   import AlphaReduction.α
+  import Names.unused
   import Variables.free
 
   /**
@@ -25,7 +27,24 @@ object DeBruijnIndex {
     index(e, freeMap.size + 1, freeMap)
   }
 
-  def reification(e: Expression): Expression = ???
+  def reify(e: Expression): Expression = reify(e, 0, Map())._1
+
+  private def asInt(v: Variable): Int = Try {
+    v.symbol.toInt
+  }.getOrElse(Integer.MAX_VALUE)
+
+  private def reify(e: Expression, level: Int, vars: Map[Int, Variable]): (Expression, Map[Int, Variable]) = e match {
+    case v: Variable if vars.contains(level - asInt(v)) => (vars(level - asInt(v)), vars)
+    case _: Variable => (unused(vars.values.toList), vars)
+    case Application(s, t) =>
+      val (s1, vars1) = reify(s, level, vars)
+      val (s2, vars2) = reify(t, level, vars1)
+      (Application(s1, s2), vars2)
+    case LambdaAbstraction(_, t) =>
+      val v = unused(vars.values.toList)
+      val (t1, vars1) = reify(t, level + 1, vars + (level -> v))
+      (LambdaAbstraction(v, t1), vars1)
+  }
 
   private val empty = Variable("")
 

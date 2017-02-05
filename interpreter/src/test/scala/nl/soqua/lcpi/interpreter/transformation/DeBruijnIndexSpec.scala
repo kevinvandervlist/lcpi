@@ -8,6 +8,11 @@ class DeBruijnIndexSpec extends WordSpec with Matchers {
 
   import DeBruijnIndex._
 
+  val _a = Expression.V("a")
+  val b = Expression.V("b")
+  val c = Expression.V("c")
+  val d = Expression.V("d")
+
   val x = Expression.V("x")
   val y = Expression.V("y")
   val z = Expression.V("z")
@@ -25,8 +30,11 @@ class DeBruijnIndexSpec extends WordSpec with Matchers {
     "work on the identity function" in {
       index(λ(x, x)) shouldBe λ(_1)
     }
-    "church truth" in {
+    "work with church truth" in {
       index(λ(x, λ(y, x))) shouldBe λ(λ(_2))
+    }
+    "deal with a free variable" in {
+      index(λ(x, y)) shouldBe λ(_2)
     }
     "work on a more complex function" in {
       val actual = index(λ(z, A(λ(y, A(y, λ(x, x))), λ(x, A(z, x)))))
@@ -36,14 +44,17 @@ class DeBruijnIndexSpec extends WordSpec with Matchers {
   }
   "Reification names based on De Bruijn indexed lambdas" should {
     "work on the identity function" in {
-      reification(λ(_1)) shouldBe λ(x, x)
+      reify(λ(_1)) shouldBe λ(_a, _a)
     }
-    "church truth" in {
-      reification(λ(λ(_2))) shouldBe λ(x, λ(y, x))
+    "work with church truth" in {
+      reify(λ(λ(_2))) shouldBe λ(_a, λ(b, _a))
+    }
+    "deal with a free variable" in {
+      reify(λ(_2)) shouldBe λ(_a, b)
     }
     "work on a more complex function" in {
-      val actual = reification(λ(A(λ(A(_1, λ(_1))), λ(A(_2, _1)))))
-      val expected = λ(z, A(λ(y, A(y, λ(x, x))), λ(x, A(z, x))))
+      val actual = reify(λ(A(λ(A(_1, λ(_1))), λ(A(_2, _1)))))
+      val expected = λ(_a, A(λ(b, A(b, λ(c, c))), λ(d, A(_a, d))))
       actual shouldBe expected
     }
   }

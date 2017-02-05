@@ -5,6 +5,8 @@ import nl.soqua.lcpi.ast.lambda.Variable
 object Names {
   private val preferedAlphabet: List[Variable] = ('a' to 'z').map(c => Variable(c.toString)).toList
 
+  def unused(known: List[Variable]): Variable = unused(preferedAlphabet.head, known)
+
   /**
     * Come up with an unnamed variable
     *
@@ -27,10 +29,10 @@ object Names {
     * @return A new variable name
     */
   private[transformation] def uniqueSuffix(v: Variable, known: List[Variable]): Variable = Stream
-      .from(0)
-      .find(p => !known.contains(newVar(v, p)))
-      .map(p => newVar(v, p))
-      .get
+    .from(0)
+    .find(p => !known.contains(newVar(v, p)))
+    .map(p => newVar(v, p))
+    .get
 
   private def newVar(v: Variable, n: Int): Variable = Variable(s"${v.symbol}$n")
 }
