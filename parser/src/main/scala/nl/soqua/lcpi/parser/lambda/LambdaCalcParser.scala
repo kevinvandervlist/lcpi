@@ -21,9 +21,12 @@ trait LambdaCalcParserRules extends RegexParsers with PackratParsers {
   lazy val parenthesizedExpression: P[Expression] = "(" ~> expression <~ ")"
 
   lazy val parseApplication: P[Expression] = {
-    val spaceSeparated = (expression <~ gap) ~ expression ^^ { case t ~ s => Application(t, s) }
+    val multipleVariablesAreLeftAssociative = expression ~ (gap ~> parseVariable).+ ^^ {
+      case t ~ s => s.foldLeft(t)((acc, e) => Application(acc, e))
+    }
+    val spaceSeparatedApplication = expression ~ (gap ~> expression) ^^ { case t ~ s => Application(t, s) }
     val disambiguationForcedByQuotes = expression ~ ("(" ~> expression <~ ")") ^^ { case t ~ s => Application(t, s) }
-    spaceSeparated | disambiguationForcedByQuotes
+    multipleVariablesAreLeftAssociative | spaceSeparatedApplication | disambiguationForcedByQuotes
   }
 
   lazy val parseLambda: P[Expression] = {

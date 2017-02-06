@@ -63,6 +63,9 @@ class LambdaCalcParserSpec extends WordSpec with Matchers {
     "parse application of a function and a variable" in {
       "λx.(x y)" >> λ(x, A(x, y))
     }
+    "parse applications left-associative" in {
+      "λf.x y z" >> λ(f, A(A(x, y), z))
+    }
   }
   "Church numerals" should {
     "parse 0" in {
@@ -98,7 +101,7 @@ class LambdaCalcParserSpec extends WordSpec with Matchers {
       "λx.λy.x" >> λ(x, λ(y, x))
     }
     "[S] parse an S-function" in {
-      "λx.λy.λz.x z (y z)" >> λ(x, λ(y, λ(z, A(x, A(z, A(y, z))))))
+      "λx.λy.λz.x z (y z)" >> λ(x, λ(y, λ(z, A(A(x, z), A(y, z)))))
     }
     "[Y] parse the y-combinator function" in {
       val g = V("g")

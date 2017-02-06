@@ -7,9 +7,18 @@ object CombinatorLibrary {
   def loadIn(ctx: Context): Context = library.foldLeft(ctx)(parseAndStore)
 
   private val library = List(
+    // Identity func
     "I := λx.x",
+    // K (constant)
+    "K := λx.λy.x",
+    // S
+    "S := λx.λy.λz.x z (y z)",
+    // Church booleans
     "T := λx.λy.x",
     "F := λx.λy.y",
+    // if-then-else
+    "IF := λp.λi.λe.p i e",
+    // Y combinator
     "Y := λf.(λx.(f(x x)) λx.(f(x x)))"
   )
 

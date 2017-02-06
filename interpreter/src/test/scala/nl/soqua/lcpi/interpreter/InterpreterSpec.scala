@@ -89,7 +89,7 @@ class InterpreterSpec extends WordSpec with Matchers {
       "I z" >> z
     }
     "leverage the power of the Y-combinator" in {
-      "Y z" >> A(z, A(V("I"), z))
+      "Y z" >> "z (Y z)"
     }
   }
 }
