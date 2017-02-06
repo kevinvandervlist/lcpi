@@ -15,15 +15,29 @@ object Main extends App {
 
   drawShell()
 
+  var traceMode = false
+
   for (ln <- io.Source.stdin.getLines) {
     Options(ln) match {
       case Help => println(Options.help)
       case Quit => System.exit(0)
       case Show => ctx.foreach((v, e) => println(s"${Stringify(v)} := ${Stringify(e)}"))
       case Reset => ctx = CombinatorLibrary loadIn Context()
-      case Other(l) => Interpreter(ctx, l) match {
+      case TraceMode if traceMode =>
+        println("Trace mode is now off.")
+        traceMode = false
+      case TraceMode if !traceMode =>
+        println("Trace mode is now on.")
+        traceMode = true
+      case Other(l) if !traceMode => Interpreter(ctx, l) match {
         case Left(e) => System.err.println(s"error: ${e.message}")
         case Right(e) => println(Stringify(e))
+      }
+      case Other(l) if traceMode => Interpreter.trace(ctx, l) match {
+        case Left(e) => System.err.println(s"error: ${e.message}")
+        case Right(e) => e.foreach {
+          case (s, expr) => println(s"$s => ${Stringify(expr)}")
+        }
       }
     }
     drawShell()

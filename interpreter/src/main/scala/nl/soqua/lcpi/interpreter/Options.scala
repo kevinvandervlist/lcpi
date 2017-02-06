@@ -8,6 +8,7 @@ object Options {
     case "help" => Help
     case "show" => Show
     case "reset" => Reset
+    case "trace" => TraceMode
     case _ => Other(str)
   }
 
@@ -22,6 +23,7 @@ object Options {
       |* `help` => show this message. Alias: `exit`.
       |* `quit` => quit the REPL.
       |* `show` => show the current REPL context.
+      |* `trace` => toggle trace mode
       |* `reset` => reset the current REPL context.
     """.stripMargin
 
@@ -34,5 +36,7 @@ case object Quit extends Options
 case object Show extends Options
 
 case object Reset extends Options
+
+case object TraceMode extends Options
 
 case class Other(line: String) extends Options

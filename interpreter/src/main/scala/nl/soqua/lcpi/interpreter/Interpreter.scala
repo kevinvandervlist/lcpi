@@ -5,6 +5,9 @@ import nl.soqua.lcpi.ast.lambda.Expression
 import nl.soqua.lcpi.parser.ParserError
 import nl.soqua.lcpi.parser.repl.ReplParser
 
+import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
+
 object Interpreter {
 
   import transformation._
@@ -36,5 +39,34 @@ object Interpreter {
     val normalized = List(α _, β _, η _).foldLeft(substituted)((t, f) => f(t))
 
     Right(normalized)
+  }
+
+  def trace(ctx: Context, line: String): Either[InterpreterError, List[(String, Expression)]] = for {
+    expr <- inputAsExpressionWithImmutableInput(ctx, line)
+    i <- Interpreter.trace(ctx, expr)
+  } yield i
+
+  def trace(ctx: Context, term: Expression): Either[InterpreterError, List[(String, Expression)]] = {
+    var expression: Expression = term
+    var out: mutable.ListBuffer[(String, Expression)] = ListBuffer.empty
+
+    ctx.foreach((v, e) => {
+      expression = substitute(expression, v, e)
+      val entry = ("S", expression)
+      if (!out.contains(entry)) {
+        out += entry
+      }
+    })
+
+    expression = α(expression)
+    out += (("α", expression))
+
+    out ++= βtrace(expression).map(x => ("β", x))
+    expression = out.last._2
+
+    expression = η(expression)
+    out += (("η", expression))
+
+    Right(out.toList)
   }
 }

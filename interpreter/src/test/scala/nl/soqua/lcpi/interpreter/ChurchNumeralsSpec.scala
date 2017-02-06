@@ -51,17 +51,17 @@ class ChurchNumeralsSpec extends WordSpec with Matchers {
     ctx << "TWO := λf.λx.f (f x)"
     ctx << "SUCCESSOR := λn.λf.λx.f (n f x)"
     "Yield number 1 when applying (T 1) 0" in {
-      "(T ONE) ZERO" >> "ONE"
+      "(TRUE ONE) ZERO" >> "ONE"
     }
     "Yield number 0 when applying (F 0) 1" in {
-      "(F ZERO) ONE" >> "ONE"
+      "(FALSE ZERO) ONE" >> "ONE"
     }
     "Have a working successor function" in {
       "SUCCESSOR ONE" >> "TWO"
     }
     "evaluate if-then-else properly" in {
-      "(((IF T) ONE) TWO)" >> "ONE"
-      "(((IF F) ONE) TWO)" >> "TWO"
+      "(((IF TRUE) ONE) TWO)" >> "ONE"
+      "(((IF FALSE) ONE) TWO)" >> "TWO"
     }
   }
 }

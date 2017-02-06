@@ -6,6 +6,15 @@ object BetaReduction {
 
   import Substitution.substitute
 
+  def βtrace(e: Expression): List[Expression] = {
+    val x = βReduction(e)
+    if (x == e) {
+      List.empty
+    } else {
+      x :: βtrace(x)
+    }
+  }
+
   /**
     * Beta reduction.
     *

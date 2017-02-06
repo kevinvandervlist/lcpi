@@ -7,6 +7,8 @@ package object transformation {
 
   def β(e: Expression): Expression = BetaReduction.β(e)
 
+  def βtrace(e: Expression): List[Expression] = BetaReduction.βtrace(e)
+
   def η(e: Expression): Expression = EtaReduction.η(e)
 
   def substitute(e: Expression, v: Variable, s: Expression): Expression = Substitution.substitute(e, v, s)

@@ -14,8 +14,8 @@ object CombinatorLibrary {
     // S
     "S := λx.λy.λz.x z (y z)",
     // Church booleans
-    "T := λx.λy.x",
-    "F := λx.λy.y",
+    "TRUE := λx.λy.x",
+    "FALSE := λx.λy.y",
     // if-then-else
     "IF := λp.λi.λe.p i e",
     // Y combinator
