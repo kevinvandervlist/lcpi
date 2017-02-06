@@ -88,8 +88,8 @@ class InterpreterSpec extends WordSpec with Matchers {
     "evaluate using the stored identity function" in {
       "I z" >> z
     }
-    "leverage the power of the Y-combinator" in {
-      "Y z" >> "z (Y z)"
+    "(Y I) is the fixpoint of I" in {
+      "Y I" >> "I (Y I)"
     }
   }
 }

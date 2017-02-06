@@ -31,9 +31,5 @@ class BetaReductionSpec extends WordSpec with Matchers {
     "do multi-step β reduction" in {
       β(A(λ(x, x), A(λ(x, x), x))) shouldBe x
     }
-    "beta-reduce Y-combinator properly" in {
-      val Y = λ(f, λ(x, A(A(f, A(x, x)), λ(x, A(f, A(x, x))))))
-      β(A(Y, z)) shouldBe A(z, A(Y, z))
-    }
   }
 }
