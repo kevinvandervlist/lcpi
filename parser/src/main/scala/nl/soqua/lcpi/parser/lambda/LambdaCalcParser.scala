@@ -19,8 +19,17 @@ trait LambdaCalcParserRules extends StdTokenParsers with PackratParsers {
   val lexical = new LambdaLexical
   lexical.delimiters ++= Seq("λ", "\\", ".", "(", ")")
 
-  lazy val expression: P[Expression] = {
+  lazy val expression1: P[Expression] = {
     application | lambda | variable | parentheses
+  }
+
+  // `expression` must be written as a non-left-recursive rule.
+  // see http://scala-language.1934581.n4.nabble.com/attachment/1956909/0/packrat_parsers.pdf for an explanation
+  lazy val expression: P[Expression] = {
+    rep1(expression1) >> {
+      case x :: xs => success(xs.foldLeft(x) { (func, arg) => Application(func, arg) })
+      case Nil => failure("err")
+    }
   }
 
   lazy val lambda: P[LambdaAbstraction] = {

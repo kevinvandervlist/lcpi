@@ -64,7 +64,7 @@ class LambdaCalcParserSpec extends LambdaCalcParserTester with WordSpecLike with
       "λf.x y z" >> λ(f, A(A(x, y), z))
     }
     "parse applications left-associative, even when given more complex λ-terms" in {
-      "λx.x λy.y λz.z f" >> A(A(A(λ(x, x), λ(y, y)), λ(z, z)), f)
+      "λx.x λy.y λz.z f" >> λ(x, A(x, λ(y, A(y, λ(z, A(z, f))))))
     }
   }
   "Church numerals" should {
