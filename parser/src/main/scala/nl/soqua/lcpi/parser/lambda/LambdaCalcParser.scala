@@ -3,47 +3,52 @@ package nl.soqua.lcpi.parser.lambda
 import nl.soqua.lcpi.ast.lambda.{Application, Expression, LambdaAbstraction, Variable}
 import nl.soqua.lcpi.parser.ParserError
 
-import scala.util.matching.Regex
-import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
-import scala.util.parsing.input.CharSequenceReader
+import scala.util.parsing.combinator.PackratParsers
+import scala.util.parsing.combinator.lexical.StdLexical
+import scala.util.parsing.combinator.syntactical.StdTokenParsers
 
-trait LambdaCalcParserRules extends RegexParsers with PackratParsers {
+trait LambdaCalcParserRules extends StdTokenParsers with PackratParsers {
+
+  protected class LambdaLexical extends StdLexical {
+    override def letter: Parser[Char] = elem("letter", c => c.isLetter && c != 'λ')
+  }
+
   type P[+T] = PackratParser[T]
 
-  private val gap: Regex = "\\s+".r
-
-  lazy val parseVariable: P[Variable] = "[a-zA-Z0-9]+".r ^^ (str => Variable(str))
+  type Tokens = LambdaLexical
+  val lexical = new LambdaLexical
+  lexical.delimiters ++= Seq("λ", "\\", ".", "(", ")")
 
   lazy val expression: P[Expression] = {
-    parseApplication | parenthesizedExpression | parseLambda | parseVariable
+    application | lambda | variable | parentheses
   }
 
-  lazy val parenthesizedExpression: P[Expression] = "(" ~> expression <~ ")"
-
-  lazy val parseApplication: P[Expression] = {
-    val multipleVariablesAreLeftAssociative = expression ~ (gap ~> parseVariable).+ ^^ {
-      case t ~ s => s.foldLeft(t)((acc, e) => Application(acc, e))
+  lazy val lambda: P[LambdaAbstraction] = {
+    ("λ" | "\\") ~> variable ~ variable.* ~ ("." ~> expression) ^^ {
+      case v ~ Nil ~ e => LambdaAbstraction(v, e)
+      case v ~ o ~ t => (v :: o).foldRight(t)((lit, acc) => LambdaAbstraction(lit, acc)).asInstanceOf[LambdaAbstraction]
     }
-    val spaceSeparatedApplication = expression ~ (gap ~> expression) ^^ { case t ~ s => Application(t, s) }
-    val disambiguationForcedByQuotes = expression ~ ("(" ~> expression <~ ")") ^^ { case t ~ s => Application(t, s) }
-    multipleVariablesAreLeftAssociative | spaceSeparatedApplication | disambiguationForcedByQuotes
   }
 
-  lazy val parseLambda: P[Expression] = {
-    ("λ" | "\\") ~> ((parseVariable ~ (gap ~> parseVariable).*) <~ ".") ~ expression ^^ {
-      case v ~ Nil ~ t => LambdaAbstraction(v, t)
-      case v ~ o ~ t => (v :: o).foldRight(t)((lit, acc) => LambdaAbstraction(lit, acc))
+  lazy val application: P[Application] = {
+    expression ~ expression ^^ {
+      case t ~ s => Application(t, s)
     }
+  }
+
+  lazy val variable: P[Variable] = {
+    ident ^^ Variable
+  }
+
+  lazy val parentheses: P[Expression] = {
+    "(" ~> expression <~ ")"
   }
 }
 
-object LambdaCalcParser extends RegexParsers with LambdaCalcParserRules {
-  override def skipWhitespace = true
-
-  override val whiteSpace: Regex = "[\t\r\f\n]+".r
+object LambdaCalcParser extends LambdaCalcParserRules {
 
   def apply(source: String): Either[ParserError, Expression] = {
-    parse(parseProgram, new PackratReader(new CharSequenceReader(source))) match {
+    parseProgram(new lexical.Scanner(source)) match {
       case NoSuccess(msg, _) => Left(ParserError(msg))
       case Success(p, _) => Right(p)
     }
