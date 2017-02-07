@@ -34,7 +34,17 @@ object Interpreter {
 
   def apply(ctx: Context, term: Expression): Either[InterpreterError, Expression] = {
     // First retrieve any variables that are stored in the context
-    val substituted = ctx.foldLeft(term)((t, v, f) => substitute(t, v, f))
+    var changing = true
+    var substituted = term
+    do {
+      val x = ctx.foldLeft(substituted)((t, v, f) => substitute(t, v, f))
+      if (x == substituted) {
+        changing = false
+      } else {
+        substituted = x
+      }
+    } while (changing)
+
     // Then normalize them
     val normalized = List(α _, β _, η _).foldLeft(substituted)((t, f) => f(t))
 
@@ -48,7 +58,8 @@ object Interpreter {
 
   def trace(ctx: Context, term: Expression): Either[InterpreterError, List[(String, Expression)]] = {
     var expression: Expression = term
-    var out: mutable.ListBuffer[(String, Expression)] = ListBuffer.empty
+    var out: mutable.ListBuffer[(String, Expression)] = substituteFromContext(ctx, term)
+
 
     ctx.foreach((v, e) => {
       expression = substitute(expression, v, e)
@@ -68,5 +79,27 @@ object Interpreter {
     out += (("η", expression))
 
     Right(out.toList)
+  }
+
+  private def substituteFromContext(ctx: Context, term: Expression): mutable.ListBuffer[(String, Expression)] = {
+    var out: mutable.ListBuffer[(String, Expression)] = ListBuffer.empty
+
+    var changing = true
+    var expression = term
+    do {
+      val initial = expression
+      ctx.foreach((v, e) => {
+        expression = substitute(expression, v, e)
+        val entry = ("S", expression)
+        if (!out.contains(entry)) {
+          out += entry
+        }
+      })
+      if (initial == expression) {
+        changing = false
+      }
+    } while (changing)
+
+    out
   }
 }

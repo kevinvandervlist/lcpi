@@ -1,8 +1,7 @@
 package nl.soqua.lcpi.interpreter
 
 import nl.soqua.lcpi.ast.lambda.Expression
-import nl.soqua.lcpi.interpreter.transformation.{DeBruijnIndex, Stringify}
-import org.scalatest.{Matchers, WordSpec, WordSpecLike}
+import org.scalatest.{Matchers, WordSpecLike}
 
 class ChurchNumeralsSpec extends InterpreterTester with WordSpecLike with Matchers {
 
@@ -25,13 +24,15 @@ class ChurchNumeralsSpec extends InterpreterTester with WordSpecLike with Matche
     ctx << "ZERO := λf.λx.x"
     ctx << "ONE := λf.λx.f x"
     ctx << "TWO := λf.λx.f (f x)"
-    ctx << "SUCCESSOR := λn.λf.λx.f (n f x)"
+
     "Yield number 1 when applying (T 1) 0" in {
       "(TRUE ONE) ZERO" >> "ONE"
     }
     "Yield number 0 when applying (F 0) 1" in {
       "(FALSE ZERO) ONE" >> "ONE"
     }
+
+    ctx << "SUCCESSOR := λn.λf.λx.f (n f x)"
     "Have a working successor function" in {
       "SUCCESSOR ONE" >> "TWO"
     }
@@ -39,6 +40,15 @@ class ChurchNumeralsSpec extends InterpreterTester with WordSpecLike with Matche
       "(((IF TRUE) ONE) TWO)" >> "ONE"
       "(((IF FALSE) ONE) TWO)" >> "TWO"
     }
+
+    ctx << "ISZERO := λn.n (λx.FALSE) TRUE"
+    "determine whether `zero` is actually zero" in {
+      "ISZERO ZERO" >> "λx.(λy.x)"
+    }
+    "determine that `one` is not zero" in {
+      "ISZERO ONE" >> "FALSE"
+    }
+    
   }
 }
 
