@@ -3,9 +3,9 @@
 * Lambda is either a `λ` or a `\ `, so `\x.x` and `λx.x` are identical
 * `sbt test`
 * `sbt assembly`
-* `java -jar interpreter/target/scala-2.12/interpreter.jar`
+* `sbt run` or `java -jar interpreter/target/scala-2.12/interpreter.jar`
 
-# Demo
+## Demo: successor
 
 ```
 ╭─kevin@Asus15  ~/src/lcpi  ‹master*›
@@ -42,4 +42,30 @@ S => ((λx.x) x)
 α => ((λx.x) x)
 β => x
 η => x
+```
+
+## Demo: summation
+```
+λ ZERO := λf.λx.x
+(λf.(λx.x))
+λ SUCCESSOR := λn.λf.λx.f (n f x)
+(λn.(λf.(λx.(f ((n f) x)))))
+λ ONE := SUCCESSOR ZERO
+(λf.(λx.(f x)))
+λ TWO := SUCCESSOR ONE
+(λf.(λx.(f (f x))))
+λ THREE := SUCCESSOR TWO
+(λf.(λx.(f (f (f x)))))
+λ ISZERO := λn.n (λx.FALSE) TRUE
+(λn.((n (λx.(λa.(λy.y)))) (λb.(λc.b))))
+λ PLUS := λm.λn.m SUCCESSOR n
+(λm.(λn.((m (λa.(λf.(λx.(f ((a f) x)))))) n)))
+λ PREDECESSOR := λn.n (λg.λk.ISZERO (g ONE) k (PLUS (g k) ONE)) (λv.ZERO) ZERO
+(λn.(((n (λg.(λk.(((((g (λf.(λh.(f h)))) (λx.(λb.(λy.y)))) (λc.(λd.c))) k) (((g k) (λo.(λp.(λq.(p ((o p) q)))))) (λs.(λt.(s t)))))))) (λw.(λz.(λx0.x0)))) (λf0.(λx1.x1))))
+λ PARTIALSUMMATION := (λf.λn.(ISZERO n) ZERO (PLUS n (f (PREDECESSOR n))))
+(λf.(λn.((((n (λx.(λb.(λy.y)))) (λc.(λd.c))) (λe.(λg.g))) ((n (λi.(λj.(λk.(j ((i j) k)))))) (f (((n (λo.(λp.(((((o (λz.(λx0.(z x0)))) (λr.(λs.(λt.t)))) (λu.(λv.u))) p) (((o p) (λn1.(λf1.(λx2.(f1 ((n1 f1) x2)))))) (λf2.(λx3.(f2 x3)))))))) (λv0.(λf4.(λx5.x5)))) (λf5.(λx6.x6))))))))
+λ SUMMATION := Y PARTIALSUMMATION
+[...] // really, really long λ-expression
+λ SUMMATION THREE
+(λo.(λp.(o (o (o (o (o (o p))))))))
 ```
