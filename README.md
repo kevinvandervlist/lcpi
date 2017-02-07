@@ -8,7 +8,7 @@
 # Demo
 
 ```
-╭─kevin@Asus15  ~/src/lcp  ‹master*›
+╭─kevin@Asus15  ~/src/lcpi  ‹master*›
 ╰─$ sbt run
 [...]
 

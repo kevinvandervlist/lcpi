@@ -2,9 +2,9 @@ package nl.soqua.lcpi.interpreter
 
 import nl.soqua.lcpi.ast.lambda.Expression
 import nl.soqua.lcpi.interpreter.transformation.{DeBruijnIndex, Stringify}
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.{Matchers, WordSpec, WordSpecLike}
 
-class ChurchNumeralsSpec extends WordSpec with Matchers {
+class ChurchNumeralsSpec extends InterpreterTester with WordSpecLike with Matchers {
 
   import Expression._
 
@@ -16,33 +16,9 @@ class ChurchNumeralsSpec extends WordSpec with Matchers {
     }
   }
 
-  private implicit class Parse(val expr: String) extends Matchers {
-    def >>(expectedExpression: Expression)(implicit ctx: Context): Unit = {
-      Interpreter(ctx, expr).fold(ex => {
-        fail(s"Expression $expr failed: $ex")
-      }, actualExpression => {
-        withClue(
-          s"""
-             |expressions are not equal. l >> r:
-             |got:      ${Stringify(actualExpression)}
-             |expected: ${Stringify(expectedExpression)}
-             |---
-          """.stripMargin) {
-          DeBruijnIndex.index(actualExpression) shouldBe DeBruijnIndex.index(expectedExpression)
-        }
-      })
-    }
-
-    def >>(expectedExpression: String)(implicit ctx: Context): Unit = Interpreter(ctx, expectedExpression)
-      .fold(ex => {
-        fail(s"Parsing of expected expression $expectedExpression failed: $ex")
-      }, >>)
-  }
-
   val x = V("x")
   val y = V("y")
   val z = V("z")
-  val xyz = V("xyz")
 
   "Calculations with Church Numerals" should {
     implicit val ctx: Context = CombinatorLibrary.loadIn(Context())

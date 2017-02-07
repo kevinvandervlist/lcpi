@@ -1,21 +1,12 @@
 package nl.soqua.lcpi.parser.repl
 
-import nl.soqua.lcpi.ast.interpreter.{Assignment, ReplExpression}
+import nl.soqua.lcpi.ast.interpreter.Assignment
 import nl.soqua.lcpi.ast.lambda.Expression
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.{Matchers, WordSpecLike}
 
-class ReplParserSpec extends WordSpec with Matchers {
+class ReplParserSpec extends ReplParserTester with WordSpecLike with Matchers {
 
   import Expression._
-
-  private implicit class Parse(val expr: String) extends Matchers {
-    def >>(term: ReplExpression): Unit =
-      ReplParser(expr).fold(ex => {
-        fail(s"Parsing of REPL expression $expr failed: $ex")
-      }, res => {
-        res shouldBe term
-      })
-  }
 
   val I = V("I")
   val x = V("x")

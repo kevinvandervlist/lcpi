@@ -2,20 +2,11 @@ package nl.soqua.lcpi.parser.lambda
 
 import nl.soqua.lcpi.ast.lambda.Expression
 import org.scalatest.exceptions.TestFailedException
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.{Matchers, WordSpecLike}
 
-class LambdaCalcParserSpec extends WordSpec with Matchers {
+class LambdaCalcParserSpec extends LambdaCalcParserTester with WordSpecLike with Matchers {
 
   import Expression._
-
-  private implicit class Parse(val expr: String) extends Matchers {
-    def >>(term: Expression): Unit =
-      LambdaCalcParser(expr).fold(ex => {
-        fail(s"Parsing of expression $expr failed: $ex")
-      }, res => {
-        res shouldBe term
-      })
-  }
 
   val arg = V("a")
   val f = V("f")
