@@ -104,10 +104,7 @@ class LambdaCalcParserSpec extends LambdaCalcParserTester with WordSpecLike with
       "λx.λy.λz.x z (y z)" >> λ(x, λ(y, λ(z, A(A(x, z), A(y, z)))))
     }
     "[Y] parse the y-combinator function" in {
-      val g = V("g")
-      //"λf.(λx.(f(x x)) λx.(f(x x)))"
-      // TODO: Validate the y-combinator, especially the AST
-      "λg.(λx.g (x x)) (λx.g (x x))" >> λ(g, A(λ(x, A(g, A(x, x))), λ(x, A(g, A(x, x)))))
+      "λf.(λx.f (x x)) (λx.f (x x))" >> λ(f, A(λ(x, A(f, A(x, x))), λ(x, A(f, A(x, x)))))
     }
   }
 }

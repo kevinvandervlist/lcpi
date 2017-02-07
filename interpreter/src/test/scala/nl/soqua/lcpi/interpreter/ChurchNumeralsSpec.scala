@@ -22,8 +22,10 @@ class ChurchNumeralsSpec extends InterpreterTester with WordSpecLike with Matche
   "Calculations with Church Numerals" should {
     implicit val ctx: Context = CombinatorLibrary.loadIn(Context())
     ctx << "ZERO := λf.λx.x"
-    ctx << "ONE := λf.λx.f x"
-    ctx << "TWO := λf.λx.f (f x)"
+    ctx << "SUCCESSOR := λn.λf.λx.f (n f x)"
+    ctx << "ONE := SUCCESSOR ZERO"
+    ctx << "TWO := SUCCESSOR ONE"
+    ctx << "THREE := SUCCESSOR TWO"
 
     "Yield number 1 when applying (T 1) 0" in {
       "(TRUE ONE) ZERO" >> "ONE"
@@ -32,7 +34,6 @@ class ChurchNumeralsSpec extends InterpreterTester with WordSpecLike with Matche
       "(FALSE ZERO) ONE" >> "ONE"
     }
 
-    ctx << "SUCCESSOR := λn.λf.λx.f (n f x)"
     "Have a working successor function" in {
       "SUCCESSOR ONE" >> "TWO"
     }
@@ -48,7 +49,18 @@ class ChurchNumeralsSpec extends InterpreterTester with WordSpecLike with Matche
     "determine that `one` is not zero" in {
       "ISZERO ONE" >> "FALSE"
     }
-    
+
+    ctx << "PLUS := λm.λn.m SUCCESSOR n"
+    ctx << "PREDECESSOR := λn.n (λg.λk.ISZERO (g ONE) k (PLUS (g k) ONE)) (λv.ZERO) ZERO"
+    "determine that `1` is a predecessor of `2`" in {
+      "PREDECESSOR TWO" >> "ONE"
+    }
+
+    ctx << "PARTIALSUMMATION := (λf.λn.(ISZERO n) ZERO (PLUS n (f (PREDECESSOR n))))"
+    ctx << "SUMMATION := Y PARTIALSUMMATION"
+    "determine that the summation of `S(0, 3)` is of `6`" in {
+      "SUMMATION THREE" >> "PLUS THREE THREE"
+    }
   }
 }
 

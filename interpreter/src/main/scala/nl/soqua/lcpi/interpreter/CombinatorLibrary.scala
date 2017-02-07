@@ -19,7 +19,7 @@ object CombinatorLibrary {
     // if-then-else
     "IF := λp.λi.λe.p i e",
     // Y combinator
-    "Y := λf.(λx.(f(x x)) λx.(f(x x)))"
+    "Y := λf.(λx.f (x x)) (λx.f (x x))"
   )
 
   private def parseAndStore(ctx: Context, expr: String): Context = {

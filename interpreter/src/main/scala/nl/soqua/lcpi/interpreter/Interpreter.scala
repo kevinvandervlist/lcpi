@@ -57,17 +57,7 @@ object Interpreter {
   } yield i
 
   def trace(ctx: Context, term: Expression): Either[InterpreterError, List[(String, Expression)]] = {
-    var expression: Expression = term
-    var out: mutable.ListBuffer[(String, Expression)] = substituteFromContext(ctx, term)
-
-
-    ctx.foreach((v, e) => {
-      expression = substitute(expression, v, e)
-      val entry = ("S", expression)
-      if (!out.contains(entry)) {
-        out += entry
-      }
-    })
+    var (out, expression) = substituteFromContext(ctx, term)
 
     expression = α(expression)
     out += (("α", expression))
@@ -81,7 +71,7 @@ object Interpreter {
     Right(out.toList)
   }
 
-  private def substituteFromContext(ctx: Context, term: Expression): mutable.ListBuffer[(String, Expression)] = {
+  private def substituteFromContext(ctx: Context, term: Expression): (mutable.ListBuffer[(String, Expression)], Expression) = {
     var out: mutable.ListBuffer[(String, Expression)] = ListBuffer.empty
 
     var changing = true
@@ -100,6 +90,6 @@ object Interpreter {
       }
     } while (changing)
 
-    out
+    (out, expression)
   }
 }

@@ -61,9 +61,6 @@ class InterpreterSpec extends InterpreterTester with WordSpecLike with Matchers 
     "evaluate using the stored identity function" in {
       "I z" >> z
     }
-    "(Y I) is the fixpoint of I" in {
-      "Y I" >> "I (Y I)"
-    }
   }
 }
 
