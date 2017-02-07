@@ -5,7 +5,7 @@ import org.scalatest.{Matchers, WordSpec}
 
 class BetaReductionSpec extends WordSpec with Matchers {
 
-  import BetaReduction.β
+  import BetaReduction.{β, beta}
 
   val x = V("x")
   val y = V("y")
@@ -15,7 +15,7 @@ class BetaReductionSpec extends WordSpec with Matchers {
     val a = V("a")
     val f = V("f")
     "reduce exr => value" in {
-      β(A(λ(x, x), z)) shouldBe z
+      beta(A(λ(x, x), z)) shouldBe z
     }
     "reduce A(λ(x, A(f, x)), a) => A(f, a)" in {
       β(A(λ(x, A(f, x)), a)) shouldBe A(f, a)

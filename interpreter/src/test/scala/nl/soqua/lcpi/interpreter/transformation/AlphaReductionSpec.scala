@@ -5,7 +5,7 @@ import org.scalatest.{Matchers, WordSpec}
 
 class AlphaReductionSpec extends WordSpec with Matchers {
 
-  import AlphaReduction.α
+  import AlphaReduction.{α, alpha}
 
   val f = V("f")
   val x = V("x")
@@ -20,7 +20,7 @@ class AlphaReductionSpec extends WordSpec with Matchers {
       α(λ(x, λ(x, x))) shouldBe λ(x, λ(a, a))
     }
     "work too" in {
-      α(λ(x, λ(x, λ(x, x)))) shouldBe λ(x, λ(a, λ(b, b)))
+      alpha(λ(x, λ(x, λ(x, x)))) shouldBe λ(x, λ(a, λ(b, b)))
     }
     "capture-avoiding substitution" in {
       val e = A(λ(f, λ(x, A(f, x))), λ(y, λ(x, y)))

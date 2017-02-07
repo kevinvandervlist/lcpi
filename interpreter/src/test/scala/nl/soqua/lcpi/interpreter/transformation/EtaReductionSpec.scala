@@ -5,7 +5,7 @@ import org.scalatest.{Matchers, WordSpec}
 
 class EtaReductionSpec extends WordSpec with Matchers {
 
-  import EtaReduction.η
+  import EtaReduction.{η, eta}
 
   val x = V("x")
   val y = V("y")
@@ -14,6 +14,9 @@ class EtaReductionSpec extends WordSpec with Matchers {
   "η-reduction" should {
     "deal with the canonical η-reduction rule" in {
       η(A(λ(x, A(λ(y, y), x)), z)) shouldBe A(λ(y, y), z)
+    }
+    "do the same with the aliased func" in {
+      eta(A(λ(x, A(λ(y, y), x)), z)) shouldBe A(λ(y, y), z)
     }
   }
 }

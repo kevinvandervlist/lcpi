@@ -10,7 +10,7 @@ stages:
 sbt-test:
   stage: test
   script:
-    - sbt test
+    - sbt coverage test coverageReport coverageAggregate
   tags:
     - docker
 

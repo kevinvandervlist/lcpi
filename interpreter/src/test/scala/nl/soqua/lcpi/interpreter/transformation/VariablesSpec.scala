@@ -29,6 +29,11 @@ class VariablesSpec extends WordSpec with Matchers {
       boundVars should have size 2
       boundVars should contain allOf(x, y)
     }
+    "Asking whether an individual variable is bound should work too" in {
+      val e = λ(x, A(x, y))
+      isBound(x, e) shouldBe true
+      isBound(y, e) shouldBe false
+    }
   }
 
   "Retrieving all variables of expressions" should {

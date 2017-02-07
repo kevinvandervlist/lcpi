@@ -24,5 +24,8 @@ class NamesSpec extends WordSpec with Matchers {
     "generate predictable names" in {
       uniqueSuffix(x, List(Variable("x0"), Variable("x1"))) shouldBe Variable("x2")
     }
+    "fall back to a unique suffix when all letters are taken" in {
+      unused(('a' to 'z').map(c => Variable(c.toString)).toList) shouldBe Variable("a0")
+    }
   }
 }

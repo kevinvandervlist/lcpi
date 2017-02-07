@@ -1,6 +1,7 @@
 package nl.soqua.lcpi.parser.lambda
 
 import nl.soqua.lcpi.ast.lambda.Expression
+import org.scalatest.exceptions.TestFailedException
 import org.scalatest.{Matchers, WordSpec}
 
 class LambdaCalcParserSpec extends WordSpec with Matchers {
@@ -24,8 +25,13 @@ class LambdaCalcParserSpec extends WordSpec with Matchers {
   val xyz = V("xyz")
 
   "A parser" should {
-    "abc" in {
+    "parse the identity func with `\\` notation" in {
       "\\x.x" >> λ(x, x)
+    }
+    "fail to parse an invalid definition" in {
+      assertThrows[TestFailedException] {
+        "λ(y,y)" >> x
+      }
     }
     "parse a simple variable" in {
       "x" >> x

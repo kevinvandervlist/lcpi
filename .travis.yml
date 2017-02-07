@@ -1,0 +1,7 @@
+language: scala
+before_install:
+  - export TZ=Europe/Amsterdam
+jdk:
+  - oraclejdk8
+scala:
+  - 2.12.1
