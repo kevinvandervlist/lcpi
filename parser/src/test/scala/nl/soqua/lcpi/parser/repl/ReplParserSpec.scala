@@ -2,6 +2,7 @@ package nl.soqua.lcpi.parser.repl
 
 import nl.soqua.lcpi.ast.interpreter.Assignment
 import nl.soqua.lcpi.ast.lambda.Expression
+import org.scalatest.exceptions.TestFailedException
 import org.scalatest.{Matchers, WordSpecLike}
 
 class ReplParserSpec extends ReplParserTester with WordSpecLike with Matchers {
@@ -17,6 +18,11 @@ class ReplParserSpec extends ReplParserTester with WordSpecLike with Matchers {
     }
     "parse an identity function assignment" in {
       "I := λx.x" >> Assignment(I, λ(x, x))
+    }
+    "throw an error if the LHS is not completely uppercase" in {
+      assertThrows[TestFailedException] {
+        "MYVar := x" >> x
+      }
     }
   }
 }

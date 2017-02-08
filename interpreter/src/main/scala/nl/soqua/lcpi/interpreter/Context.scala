@@ -2,32 +2,28 @@ package nl.soqua.lcpi.interpreter
 
 import nl.soqua.lcpi.ast.lambda.{Expression, Variable}
 
-import scala.collection.mutable
-
 trait Context {
-  def foldLeft(seed: Expression)(op: (Expression, Variable, Expression) => Expression): Expression
+  def foldLeft[T](seed: T)(op: (T, Variable, Expression) => T): T
 
   def foreach(fn: (Variable, Expression) => Unit): Unit
 
-  def assign(v: Variable, e: Expression): Option[Expression]
+  def assign(v: Variable, e: Expression): Context
 
   def contains(v: Variable): Boolean
 }
 
 object Context {
-  def apply(): Context = new ContextImpl()
+  def apply(): Context = ContextImpl(Map.empty)
 }
 
-private class ContextImpl() extends Context {
-  private val values: mutable.Map[Variable, Expression] = mutable.Map()
+private case class ContextImpl(values: Map[Variable, Expression]) extends Context {
 
-  override def assign(v: Variable, e: Expression): Option[Expression] = values.put(v, e)
+  override def assign(v: Variable, e: Expression): Context = copy(values + (v -> e))
 
   override def contains(v: Variable): Boolean = values.contains(v)
 
   override def foreach(fn: (Variable, Expression) => Unit): Unit = values.foreach(t => fn(t._1, t._2))
 
-  override def foldLeft(seed: Expression)(op: (Expression, Variable, Expression) => Expression): Expression = {
+  override def foldLeft[T](seed: T)(op: (T, Variable, Expression) => T): T =
     values.foldLeft(seed)((acc, t) => op(acc, t._1, t._2))
-  }
 }

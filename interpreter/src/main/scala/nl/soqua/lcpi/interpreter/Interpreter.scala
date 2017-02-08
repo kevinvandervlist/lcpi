@@ -1,10 +1,8 @@
 package nl.soqua.lcpi.interpreter
 
-import nl.soqua.lcpi.ast.interpreter.Assignment
 import nl.soqua.lcpi.ast.interpreter.ReplExpression._
+import nl.soqua.lcpi.ast.interpreter.{Assignment, ReplExpression}
 import nl.soqua.lcpi.ast.lambda.{Expression, Variable}
-import nl.soqua.lcpi.parser.ParserError
-import nl.soqua.lcpi.parser.repl.ReplParser
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -15,28 +13,19 @@ object Interpreter {
 
   private def existingVarError(v: Variable) = InterpreterError(s"The variable '${v.symbol}' has already been assigned in the context")
 
-  private def capitalizationRequired(v: Variable) = InterpreterError(s"The variable '${v.symbol}' should be fully capitalized")
+  private def inputAsExpressionWithImmutableInput(ctx: Context, expression: ReplExpression): Either[InterpreterError, InterpreterResult] =
+    expression match {
+      case Assignment(v, _) if ctx.contains(v) => Left(existingVarError(v))
+      case Assignment(v, expr) => Right(InterpreterResult(ctx.assign(v, expr), re2e(expr)))
+      case nl.soqua.lcpi.ast.interpreter.Expression(expr) => Right(InterpreterResult(ctx, expr))
+    }
 
-  private def inputAsExpressionWithImmutableInput(ctx: Context, line: String): Either[InterpreterError, Expression] =
-    ReplParser(line)
-      .right
-      .flatMap({
-        case Assignment(v, _) if v.symbol.toUpperCase() != v.symbol => Left(capitalizationRequired(v))
-        case Assignment(v, _) if ctx.contains(v) => Left(existingVarError(v))
-        case Assignment(v, expr) => ctx.assign(v, expr); Right(re2e(expr))
-        case nl.soqua.lcpi.ast.interpreter.Expression(expr) => Right(expr)
-      }).left
-      .map({
-        case ParserError(msg) => InterpreterError(s"Parser error occurred: $msg")
-        case e: InterpreterError => e
-      })
-
-  def apply(ctx: Context, line: String): Either[InterpreterError, Expression] = for {
-    expr <- inputAsExpressionWithImmutableInput(ctx, line)
-    i <- Interpreter(ctx, expr)
+  def apply(ctx: Context, expression: ReplExpression): Either[InterpreterError, InterpreterResult] = for {
+    expr <- inputAsExpressionWithImmutableInput(ctx, expression)
+    i <- Interpreter(expr.context, expr.expression)
   } yield i
 
-  def apply(ctx: Context, term: Expression): Either[InterpreterError, Expression] = {
+  def apply(ctx: Context, term: Expression): Either[InterpreterError, InterpreterResult] = {
     // First retrieve any variables that are stored in the context
     var changing = true
     var substituted = term
@@ -52,15 +41,15 @@ object Interpreter {
     // Then normalize them
     val normalized = List(α _, β _, η _).foldLeft(substituted)((t, f) => f(t))
 
-    Right(normalized)
+    Right(InterpreterResult(ctx, normalized))
   }
 
-  def trace(ctx: Context, line: String): Either[InterpreterError, List[(String, Expression)]] = for {
-    expr <- inputAsExpressionWithImmutableInput(ctx, line)
-    i <- Interpreter.trace(ctx, expr)
+  def trace(ctx: Context, expression: ReplExpression): Either[InterpreterError, InterpreterResult] = for {
+    expr <- inputAsExpressionWithImmutableInput(ctx, expression)
+    i <- Interpreter.trace(expr.context, expr.expression)
   } yield i
 
-  def trace(ctx: Context, term: Expression): Either[InterpreterError, List[(String, Expression)]] = {
+  def trace(ctx: Context, term: Expression): Either[InterpreterError, InterpreterResult] = {
     var (out, expression) = substituteFromContextDeclarations(ctx, term)
 
     expression = α(expression)
@@ -72,7 +61,7 @@ object Interpreter {
     expression = η(expression)
     out += (("η", expression))
 
-    Right(out.toList)
+    Right(InterpreterResult(ctx, out.toList))
   }
 
   private def substituteFromContextDeclarations(ctx: Context, term: Expression): (mutable.ListBuffer[(String, Expression)], Expression) = {

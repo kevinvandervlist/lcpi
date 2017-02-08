@@ -1,4 +1,4 @@
-package nl.soqua.lcpi.repl
+package nl.soqua.lcpi.repl.lib
 
 import nl.soqua.lcpi.ast.interpreter.Assignment
 import nl.soqua.lcpi.interpreter.Context
@@ -26,8 +26,7 @@ object CombinatorLibrary {
   private def parseAndStore(ctx: Context, expr: String): Context = {
     ReplParser(expr) match {
       case Right(Assignment(v, e)) => ctx.assign(v, e)
-      case _ =>
+      case _ => ctx
     }
-    ctx
   }
 }

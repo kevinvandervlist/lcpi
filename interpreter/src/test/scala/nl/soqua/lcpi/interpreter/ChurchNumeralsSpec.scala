@@ -1,15 +1,19 @@
 package nl.soqua.lcpi.interpreter
 
 import nl.soqua.lcpi.ast.lambda.Expression
+import nl.soqua.lcpi.parser.repl.ReplParser
 import org.scalatest.{Matchers, WordSpecLike}
 
 class ChurchNumeralsSpec extends InterpreterTester with WordSpecLike with Matchers {
 
   import Expression._
 
-  private implicit class ContextBuilder(ctx: Context) extends Matchers {
+  private implicit class ContextBuilder(ctx: MutableContext) extends Matchers {
     def <<(expr: String): Unit = {
-      Interpreter(ctx, expr) match {
+      for {
+        e <- ReplParser(expr)
+        r <- Interpreter(ctx, e)
+      } yield r match {
         case _ =>
       }
     }
@@ -20,7 +24,7 @@ class ChurchNumeralsSpec extends InterpreterTester with WordSpecLike with Matche
   val z = V("z")
 
   "Calculations with Church Numerals" should {
-    implicit val ctx: Context = Context()
+    implicit val ctx: MutableContext = Context()
     ctx << "ZERO := λf.λx.x"
     ctx << "SUCCESSOR := λn.λf.λx.f (n f x)"
     ctx << "ONE := SUCCESSOR ZERO"

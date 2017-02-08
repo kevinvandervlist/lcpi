@@ -1,7 +1,9 @@
 package nl.soqua.lcpi.repl
 
-import nl.soqua.lcpi.interpreter.{Context, Interpreter}
-import nl.soqua.lcpi.interpreter.transformation.Stringify
+import nl.soqua.lcpi.interpreter.Context
+import nl.soqua.lcpi.repl.lib.CombinatorLibrary
+import nl.soqua.lcpi.repl.monad.{ReplCompiler, ReplState}
+import nl.soqua.lcpi.repl.parser.StdInParser
 
 object Main extends App {
   var ctx = CombinatorLibrary loadIn Context()
@@ -16,29 +18,21 @@ object Main extends App {
 
   drawShell()
 
-  var traceMode = false
+  var state = ReplState.empty
+  var effect: Any = _
 
   for (ln <- io.Source.stdin.getLines) {
-    Options(ln) match {
-      case Help => println(Options.help)
-      case Quit => System.exit(0)
-      case Show => ctx.foreach((v, e) => println(s"${Stringify(v)} := ${Stringify(e)}"))
-      case Reset => ctx = CombinatorLibrary loadIn Context()
-      case TraceMode if traceMode =>
-        println("Trace mode is now off.")
-        traceMode = false
-      case TraceMode if !traceMode =>
-        println("Trace mode is now on.")
-        traceMode = true
-      case Other(l) if !traceMode => Interpreter(ctx, l) match {
-        case Left(e) => System.err.println(s"error: ${e.message}")
-        case Right(e) => println(Stringify(e))
-      }
-      case Other(l) if traceMode => Interpreter.trace(ctx, l) match {
-        case Left(e) => System.err.println(s"error: ${e.message}")
-        case Right(e) => e.foreach {
-          case (s, expr) => println(s"$s => ${Stringify(expr)}")
-        }
+    StdInParser(ln) match {
+      case Left(e) => println(e)
+      case Right(cmd) => cmd.foldMap(ReplCompiler.pureCompiler).run(state).value match {
+        case (s: ReplState, _) if s.terminated =>
+          System.exit(0)
+        case (s: ReplState, effect: String) =>
+          state = s
+          println(effect)
+        case (s: ReplState, _) =>
+          state = s
+        case _ =>
       }
     }
     drawShell()

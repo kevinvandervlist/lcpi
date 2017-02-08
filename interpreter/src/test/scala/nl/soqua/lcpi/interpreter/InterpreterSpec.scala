@@ -13,7 +13,7 @@ class InterpreterSpec extends InterpreterTester with WordSpecLike with Matchers 
   val z = V("z")
 
   "Evaluation" should {
-    implicit val ctx: Context = Context()
+    implicit val ctx: MutableContext = Context()
     "stay the same in case of an identity function" in {
       "λx.x" >> λ(x, x)
     }
@@ -23,23 +23,24 @@ class InterpreterSpec extends InterpreterTester with WordSpecLike with Matchers 
   }
   "Evaluation with tracing mode" should {
     "Yield a list of intermediate steps" in {
-      implicit val ctx: Context = Context()
+      implicit val ctx: MutableContext = Context()
       val _a = V("a")
       "I := λx.x" >> "λx.x"
       Interpreter.trace(ctx, "(I λx.x) z") match {
         case Left(e) => fail(e.message)
-        case Right(expressions) => expressions shouldBe List(
+        case Right(TraceInterpreterResult(_, _, trace)) => trace shouldBe List(
           "S" -> A(A(λ(x, x), λ(x, x)), z),
           "α" -> A(A(λ(x, x), λ(_a, _a)), z),
           "β" -> A(λ(_a, _a), z),
           "β" -> z,
           "η" -> z
         )
+        case Right(_) => fail("unexpected result")
       }
     }
   }
   "Assignments" should {
-    implicit val ctx: Context = Context()
+    implicit val ctx: MutableContext = Context()
     "do assignments" in {
       "MYVAR := λx.x" >> "λx.x"
       "MYVAR z" >> z
@@ -50,19 +51,9 @@ class InterpreterSpec extends InterpreterTester with WordSpecLike with Matchers 
       }
       "MYVAR z" >> z
     }
-    "reject them when the assignments are (partially) lower case" in {
-      assertThrows[TestFailedException] {
-        "Foo := x" >> "x"
-      }
-    }
-    "deal with parser errors" in {
-      assertThrows[TestFailedException] {
-        "function(x) { return x; }" >> ""
-      }
-    }
   }
   "Evaluation with the usage of variables" should {
-    implicit val ctx: Context = Context()
+    implicit val ctx: MutableContext = Context()
     "evaluate using the stored identity function" in {
       "I := λx.x" >> "λx.x"
       "I z" >> z

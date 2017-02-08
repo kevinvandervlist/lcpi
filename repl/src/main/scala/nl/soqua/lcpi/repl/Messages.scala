@@ -1,18 +1,7 @@
 package nl.soqua.lcpi.repl
 
-sealed trait Options
-
-object Options {
-  def apply(str: String): Options = str match {
-    case "quit" | "exit" => Quit
-    case "help" => Help
-    case "show" => Show
-    case "reset" => Reset
-    case "trace" => TraceMode
-    case _ => Other(str)
-  }
-
-  def help: String =
+object Messages {
+  val help: String =
     """
       |Notation:
       |* λ is either a λ or a \. So both \x.x and λx.x are allowed.
@@ -26,17 +15,6 @@ object Options {
       |* `trace` => toggle trace mode
       |* `reset` => reset the current REPL context.
     """.stripMargin
-
+  val traceModeEnabled: String = "Trace mode is now on."
+  val traceModeDisabled: String = "Trace mode is now off."
 }
-
-case object Help extends Options
-
-case object Quit extends Options
-
-case object Show extends Options
-
-case object Reset extends Options
-
-case object TraceMode extends Options
-
-case class Other(line: String) extends Options

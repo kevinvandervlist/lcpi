@@ -1,13 +1,45 @@
 package nl.soqua.lcpi.interpreter
 
-import nl.soqua.lcpi.ast.lambda.Expression
+import nl.soqua.lcpi.ast.interpreter.ReplExpression
+import nl.soqua.lcpi.ast.lambda.{Expression, Variable}
 import nl.soqua.lcpi.interpreter.transformation.{DeBruijnIndex, Stringify}
+import nl.soqua.lcpi.parser.repl.ReplParser
 import org.scalatest.Matchers
+
+import scala.language.implicitConversions
 
 trait InterpreterTester {
 
+  implicit def parseExpression(line: String): ReplExpression = {
+    ReplParser(line) match {
+      case Left(_) => Variable("x")
+      case Right(e) => e
+    }
+  }
+
+  /**
+    * Create a mutable context for testing purposes
+    *
+    * @param ctx
+    */
+  protected implicit class MutableContext(private var ctx: Context) extends Context {
+    override def foldLeft[T](seed: T)(op: (T, Variable, Expression) => T): T =
+      ctx.foldLeft(seed)(op)
+
+    override def foreach(fn: (Variable, Expression) => Unit): Unit =
+      ctx.foreach(fn)
+
+    override def assign(v: Variable, e: Expression): Context = {
+      ctx = ctx.assign(v, e)
+      ctx
+    }
+
+    override def contains(v: Variable): Boolean = ctx.contains(v)
+  }
+
   /**
     * This class allows a convenient notation for test declarations
+    *
     * @param expr The left hand side expression to parse. Yields the 'actual' result of the assertion.
     */
   protected implicit class InterpreterParserAndTester(val expr: String) extends Matchers {
@@ -15,6 +47,7 @@ trait InterpreterTester {
       * Assert equality given an expression expr that will be compared to the 'actual' result
       * (e.g. the left hand side). Equality is determined by writing the expressions in De Bruijn Index form
       * for α-equivalence
+      *
       * @param expectedExpression
       * @param ctx
       */
@@ -25,11 +58,11 @@ trait InterpreterTester {
         withClue(
           s"""
              |expressions are not equal. l >> r:
-             |got:      ${Stringify(actualExpression)}
+             |got:      ${Stringify(actualExpression.expression)}
              |expected: ${Stringify(expectedExpression)}
              |---
           """.stripMargin) {
-          DeBruijnIndex.index(actualExpression) shouldBe DeBruijnIndex.index(expectedExpression)
+          DeBruijnIndex.index(actualExpression.expression) shouldBe DeBruijnIndex.index(expectedExpression)
         }
       })
     }
@@ -38,13 +71,14 @@ trait InterpreterTester {
       * Assert equality given an expression str that will be parsed and compared to the 'actual' result
       * (e.g. the left hand side). Equality is determined by writing the expressions in De Bruijn Index form
       * for α-equivalence
+      *
       * @param expectedExpression
       * @param ctx
       */
     def >>(expectedExpression: String)(implicit ctx: Context): Unit = Interpreter(ctx, expectedExpression)
       .fold(ex => {
         fail(s"Parsing of expected expression $expectedExpression failed: $ex")
-      }, >>)
+      }, result => >>(result.expression))
   }
 
 }

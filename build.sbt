@@ -1,5 +1,11 @@
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint")
 
+// Cats and cats-free version
+val catsVersion = "0.9.0"
+// scala-parser-combinator version
+val sParSecVersion = "1.0.4"
+
+
 lazy val commonSettings = Seq(
   organization := "nl.soqua",
   name := "lcpi",
@@ -13,11 +19,10 @@ lazy val commonSettings = Seq(
     "-unchecked"
   ),
   libraryDependencies ++= Seq(
-    "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
-    "org.scalatest" %% "scalatest" % "3.0.0" % "test"
+    "org.scalatest" %% "scalatest" % "3.0.1" % "test"
   ),
-  // Exclude the *repl* package from coverage reports
-  coverageExcludedPackages := "nl.soqua.lcpi.repl.*"
+  // Exclude the Main.scala from coverage reports
+  coverageExcludedFiles := ".*Main.*"
 )
 
 lazy val ast = (project in file("ast")).
@@ -31,6 +36,9 @@ lazy val parser = (project in file("parser")).
   settings(commonSettings: _*).
   settings(
     name := "parser",
+    libraryDependencies ++= Seq(
+      "org.scala-lang.modules" %% "scala-parser-combinators" % sParSecVersion
+    ),
     assemblyJarName in assembly := "parser.jar"
   ).dependsOn(ast)
 
@@ -46,5 +54,10 @@ lazy val repl = (project in file("repl")).
   settings(
     name := "repl",
     assemblyJarName in assembly := "repl.jar",
+    libraryDependencies ++= Seq(
+      "org.scala-lang.modules" %% "scala-parser-combinators" % sParSecVersion,
+      "org.typelevel" %% "cats" % catsVersion,
+      "org.typelevel" %% "cats-free" % catsVersion
+    ),
     mainClass in assembly := Some("nl.soqua.lcpi.repl.Main")
   ).dependsOn(ast, parser, interpreter)

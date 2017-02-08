@@ -8,10 +8,13 @@ import nl.soqua.lcpi.parser.lambda.LambdaCalcParserRules
 trait ReplParserRules extends LambdaCalcParserRules {
   lexical.delimiters ++= Seq(":=")
 
+  private def capitalizationRequired(v: Variable) = s"The variable '${v.symbol}' should be fully capitalized"
+
   lazy val line: P[ReplExpression] = {
-    (variable <~ ":=").? ~ expression ^^ {
-      case None ~ expr => ReplExpression.e2re(expr)
-      case Some(v) ~ expr => Assignment(v, expr)
+    (variable <~ ":=").? ~ expression >> {
+      case None ~ expr => success(ReplExpression.e2re(expr))
+      case Some(v) ~ _ if v.symbol.toUpperCase() != v.symbol => failure(capitalizationRequired(v))
+      case Some(v) ~ expr => success(Assignment(v, expr))
     }
   }
 }
