@@ -34,6 +34,8 @@ lcpi λ> show
 [...]
 S := (λx.(λy.(λz.((x z) (y z)))))
 K := (λx.(λy.x))
+lcpi λ> trace
+Trace mode is now on.
 lcpi λ> S K K
 S => ((S K) K)
 S => (((λx.(λy.(λz.((x z) (y z))))) K) K)
