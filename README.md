@@ -13,11 +13,12 @@ Among others, the following features are supported:
 * The REPL can toggle between a normal and a *tracing* mode, showing all intermediate reduction steps.
 * Although not supported in pure λ-calculus, one can use the REPL to assign expressions to variables. These will be substituted before running the α-reduction.
 * A few well-known functions are added by default for convenience (e.g. I, Y, TRUE etc).
+* Additional files containing extra λs can be (re)loaded from within the REPL. See the loading and reloading demo.
 * Run `help` in the REPL for additional information.
 
 ## running the REPL:
-* You can download [the latest release](https://github.com/kevinvandervlist/lcpi/releases/latest).
-* Or clone the repo and `sbt run` it.
+* You can download [the latest release](https://github.com/kevinvandervlist/lcpi/releases/latest) ([changelog](https://github.com/kevinvandervlist/lcpi/blob/master/CHANGELOG.md)).
+* ...or clone the repo and `sbt run` it.
 
 ## Building (and testing) the REPL
 * `sbt test`
@@ -100,4 +101,44 @@ lcpi λ> SUMMATION := Y PARTIALSUMMATION
 [...] // really, really long λ-expression
 lcpi λ> SUMMATION THREE
 (λo.(λp.(o (o (o (o (o (o p))))))))
+```
+
+## Demo: loading and reloading
+```
+╭─kevin@Asus15  ~/src/lcpi  ‹master› 
+╰─$ cat extra.lcpi 
+# This is a comment
+# The following line will assign `FOO`
+FOO := λx.x
+# This will silently be discarded
+astnuasohu a +]4Clru[
+# This will be loaded as well
+BAR := FOO y
+╭─kevin@Asus15  ~/src/lcpi  ‹master› 
+╰─$ sbt run       
+[...]
+
+A λ-calculus interpreter. Type `help` for usage information.
+    
+lcpi λ> show
+[...]
+lcpi λ> load extra.lcpi
+Successfully loaded file `extra.lcpi`
+lcpi λ> show
+[...]
+BAR := (FOO y)
+FOO := (λx.x)
+lcpi λ>
+// In another terminal
+╭─kevin@Asus15  ~/src/lcpi  ‹master› 
+╰─$ echo "QUUK := z" >> extra.lcpi 
+
+// Back to the REPL again
+lcpi λ> reload
+Successfully reloaded file `extra.lcpi`
+lcpi λ> show
+[...]
+BAR := (FOO y)
+QUUK := z
+FOO := (λx.x)
 ```
