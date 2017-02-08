@@ -49,12 +49,6 @@ S => (((λx.(λy.(λz.((x z) (y z))))) (λx.(λy.x))) (λx.(λy.x)))
 ## Demo: successor
 
 ```
-╭─kevin@Asus15  ~/src/lcpi  ‹master*›
-╰─$ sbt run
-[...]
-
-A λ-calculus interpreter. Type `help` for usage information.
-    
 lcpi λ> ZERO := λf.λx.x
 (λf.(λx.x))
 lcpi λ> SUCCESSOR := λn.λf.λx.f (n f x)
