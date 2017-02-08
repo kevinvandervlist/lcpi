@@ -72,7 +72,7 @@ object ReplCompiler {
           s.reloadableFile match {
             case None => (s, "Failed to reload: no file has been loaded yet")
             case Some(path) => disk.load(path) match {
-              case Failure(ex) => (s, s"Failed to load `$path`: ${ex.getMessage}")
+              case Failure(ex) => (s, s"Failed to reload `$path`: ${ex.getMessage}")
               case Success(stream) => (s.copy(context = loadContextFromFile(stream, s.context)), s"Successfully reloaded file `$path`")
             }
           }
