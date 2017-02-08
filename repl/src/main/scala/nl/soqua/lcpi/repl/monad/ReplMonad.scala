@@ -17,6 +17,8 @@ case object TraceMode extends ReplMonadA[String]
 
 case class LoadFile(path: String) extends ReplMonadA[String]
 
+case object Reload extends ReplMonadA[String]
+
 case class Command(expression: ReplExpression) extends ReplMonadA[String]
 
 object ReplMonad {
@@ -33,6 +35,8 @@ object ReplMonad {
   def trace(): Repl[String] = Free.liftF[ReplMonadA, String](TraceMode)
 
   def load(path: String): Repl[String] = Free.liftF[ReplMonadA, String](LoadFile(path))
+
+  def reload(): Repl[String] = Free.liftF[ReplMonadA, String](Reload)
 
   def expression(e: ReplExpression): Free[ReplMonadA, String] = Free.liftF[ReplMonadA, String](Command(e))
 

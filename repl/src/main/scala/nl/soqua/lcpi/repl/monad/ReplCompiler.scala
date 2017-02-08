@@ -32,6 +32,14 @@ object ReplCompiler {
   private def renderContext(acc: mutable.StringBuilder, v: Variable, e: Expression): mutable.StringBuilder =
     acc.append(s"${Stringify(v)} := ${Stringify(e)}$lb")
 
+  private def loadContextFromFile(stream: Stream[String], ctx: Context): Context = stream
+    .filterNot(l => l.startsWith("#")) // Skip 'comments'
+    .map(l => ReplParser(l))
+    .collect {
+      case Right(Assignment(v, e)) => (v, e)
+    }
+    .foldLeft(ctx)((acc, t) => acc.assign(t._1, t._2))
+
   def compiler(disk: DiskIO): alias = new (alias) {
     def apply[A](fa: ReplMonadA[A]): PureReplState[A] = {
       fa match {
@@ -57,18 +65,19 @@ object ReplCompiler {
         case LoadFile(path) => disk.load(path) match {
           case Failure(ex) => State.pure(s"Failed to load `$path`: ${ex.getMessage}")
           case Success(stream) => State(s => {
-            val ctx = stream
-              .filterNot(l => l.startsWith("#")) // Skip 'comments'
-              .map(l => ReplParser(l))
-              .collect {
-                case Right(Assignment(v, e)) => (v, e)
-              }
-              .foldLeft(s.context)((acc, t) => acc.assign(t._1, t._2))
-            (s.copy(context = ctx), s"Successfully loaded file `$path`")
+            (s.copy(context = loadContextFromFile(stream, s.context), reloadableFile = Some(path)), s"Successfully loaded file `$path`")
           })
         }
+        case Reload => State(s => {
+          s.reloadableFile match {
+            case None => (s, "Failed to reload: no file has been loaded yet")
+            case Some(path) => disk.load(path) match {
+              case Failure(ex) => (s, s"Failed to reload `$path`: ${ex.getMessage}")
+              case Success(stream) => (s.copy(context = loadContextFromFile(stream, s.context)), s"Successfully reloaded file `$path`")
+            }
+          }
+        })
       }
     }
   }
-
 }

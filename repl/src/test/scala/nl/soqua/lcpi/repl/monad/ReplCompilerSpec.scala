@@ -23,6 +23,9 @@ class ReplCompilerSpec extends WordSpecLike with Matchers {
   val emptyState: ReplState = ReplState.empty
 
   "A repl compiler" should {
+    val failed = new DiskIO {
+      override def load(path: String): Try[Stream[String]] = Failure(new IllegalArgumentException("failed"))
+    }
     implicit val compiler = ReplCompiler.compiler(new DiskIO {
       override def load(path: String): Try[Stream[String]] = Try {
         List(
@@ -58,11 +61,11 @@ class ReplCompilerSpec extends WordSpecLike with Matchers {
       implicit val state = emptyState.copy(context = c)
       ReplMonad.reset() >> emptyState
     }
-    "Evaluate an expression in normal mode" in {
+    "evaluate an expression in normal mode" in {
       val e = Application(Variable("I"), Variable("x"))
       ReplMonad.expression(e) >> "x"
     }
-    "Evaluate an expression in trace mode" in {
+    "evaluate an expression in trace mode" in {
       implicit val state = emptyState.copy(traceMode = Enabled)
       val e = Application(Variable("I"), Variable("x"))
       ReplMonad.expression(e) >> List(
@@ -73,20 +76,30 @@ class ReplCompilerSpec extends WordSpecLike with Matchers {
         "x"
       ).mkString(System.lineSeparator())
     }
-    "Duplicate assignments should be rejected" in {
+    "duplicate assignments should be rejected" in {
       ReplMonad.expression(Assignment(Variable("I"), Variable("x"))) >> "The variable 'I' has already been assigned in the context"
     }
-    "Load a file" in {
+    "load a file" in {
       val c = CombinatorLibrary.loadIn(Context()).assign(Variable("FOO"), Variable("x"))
       ReplMonad.load("foo") >> "Successfully loaded file `foo`"
-      ReplMonad.load("foo") >> emptyState.copy(context = c)
+      ReplMonad.load("foo") >> emptyState.copy(context = c, reloadableFile = Some("foo"))
     }
-    "Fail to load a file" in {
-      implicit val compiler = ReplCompiler.compiler(new DiskIO {
-        override def load(path: String): Try[Stream[String]] = Failure(new IllegalArgumentException("failed"))
-      })
+    "fail to load a file" in {
+      implicit val compiler = ReplCompiler.compiler(failed)
       ReplMonad.load("foo") >> "Failed to load `foo`: failed"
       ReplMonad.load("foo") >> emptyState
+    }
+    "reload a loaded file" in {
+      implicit val state = emptyState.copy(reloadableFile = Some("bar"))
+      ReplMonad.reload() >> "Successfully reloaded file `bar`"
+    }
+    "fail to reload when no file is loaded yet" in {
+      ReplMonad.reload() >> "Failed to reload: no file has been loaded yet"
+    }
+    "load a file, then fail to reload it again" in {
+      implicit val compiler = ReplCompiler.compiler(failed)
+      implicit val state = emptyState.copy(reloadableFile = Some("foo"))
+      ReplMonad.reload() >> "Failed to reload `foo`: failed"
     }
   }
 }
