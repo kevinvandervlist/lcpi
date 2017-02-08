@@ -1,25 +1,35 @@
 package nl.soqua.lcpi.repl.monad
 
 import nl.soqua.lcpi.ast.interpreter.Assignment
-import nl.soqua.lcpi.ast.lambda.{Application, LambdaAbstraction, Variable}
+import nl.soqua.lcpi.ast.lambda.{Application, Variable}
 import nl.soqua.lcpi.interpreter.Context
 import nl.soqua.lcpi.repl.Messages
+import nl.soqua.lcpi.repl.lib.{CombinatorLibrary, DiskIO}
 import nl.soqua.lcpi.repl.monad.ReplMonad.Repl
 import org.scalatest.{Matchers, WordSpecLike}
+
+import scala.util.{Failure, Try}
 
 class ReplCompilerSpec extends WordSpecLike with Matchers {
 
   implicit class ReplMonadSpec(val cmd: Repl[_]) {
-    def >>[T](expected: T)(implicit state: ReplState): Unit =
-      cmd.foldMap(ReplCompiler.pureCompiler).run(state).value._2 shouldBe expected
+    def >>[T](expected: T)(implicit compiler: ReplCompiler.alias, state: ReplState): Unit =
+      cmd.foldMap(compiler).run(state).value._2 shouldBe expected
 
-    def >>[T](expected: ReplState)(implicit state: ReplState): Unit =
-      cmd.foldMap(ReplCompiler.pureCompiler).run(state).value._1 shouldBe expected
+    def >>[T](expected: ReplState)(implicit compiler: ReplCompiler.alias, state: ReplState): Unit =
+      cmd.foldMap(compiler).run(state).value._1 shouldBe expected
   }
 
   val emptyState: ReplState = ReplState.empty
 
   "A repl compiler" should {
+    implicit val compiler = ReplCompiler.compiler(new DiskIO {
+      override def load(path: String): Try[Stream[String]] = Try {
+        List(
+          "FOO := x"
+        ).toStream
+      }
+    })
     implicit val state: ReplState = emptyState
     "provide the user with usage information" in {
       ReplMonad.help() >> Messages.help
@@ -65,6 +75,18 @@ class ReplCompilerSpec extends WordSpecLike with Matchers {
     }
     "Duplicate assignments should be rejected" in {
       ReplMonad.expression(Assignment(Variable("I"), Variable("x"))) >> "The variable 'I' has already been assigned in the context"
+    }
+    "Load a file" in {
+      val c = CombinatorLibrary.loadIn(Context()).assign(Variable("FOO"), Variable("x"))
+      ReplMonad.load("foo") >> "Successfully loaded file `foo`"
+      ReplMonad.load("foo") >> emptyState.copy(context = c)
+    }
+    "Fail to load a file" in {
+      implicit val compiler = ReplCompiler.compiler(new DiskIO {
+        override def load(path: String): Try[Stream[String]] = Failure(new IllegalArgumentException("failed"))
+      })
+      ReplMonad.load("foo") >> "Failed to load `foo`: failed"
+      ReplMonad.load("foo") >> emptyState
     }
   }
 }
