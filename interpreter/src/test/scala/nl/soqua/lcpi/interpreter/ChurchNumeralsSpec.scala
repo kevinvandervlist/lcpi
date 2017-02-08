@@ -20,12 +20,16 @@ class ChurchNumeralsSpec extends InterpreterTester with WordSpecLike with Matche
   val z = V("z")
 
   "Calculations with Church Numerals" should {
-    implicit val ctx: Context = CombinatorLibrary.loadIn(Context())
+    implicit val ctx: Context = Context()
     ctx << "ZERO := λf.λx.x"
     ctx << "SUCCESSOR := λn.λf.λx.f (n f x)"
     ctx << "ONE := SUCCESSOR ZERO"
     ctx << "TWO := SUCCESSOR ONE"
     ctx << "THREE := SUCCESSOR TWO"
+
+    ctx << "TRUE := λx.λy.x"
+    ctx << "FALSE := λx.λy.y"
+    ctx << "IF := λp.λi.λe.p i e"
 
     "Yield number 1 when applying (T 1) 0" in {
       "(TRUE ONE) ZERO" >> "ONE"
@@ -56,6 +60,7 @@ class ChurchNumeralsSpec extends InterpreterTester with WordSpecLike with Matche
       "PREDECESSOR TWO" >> "ONE"
     }
 
+    ctx << "Y := λf.(λx.f (x x)) (λx.f (x x))"
     ctx << "PARTIALSUMMATION := (λf.λn.(ISZERO n) ZERO (PLUS n (f (PREDECESSOR n))))"
     ctx << "SUMMATION := Y PARTIALSUMMATION"
     "determine that the summation of `S(0, 3)` is of `6`" in {

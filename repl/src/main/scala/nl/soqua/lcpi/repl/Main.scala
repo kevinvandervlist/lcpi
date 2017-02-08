@@ -1,11 +1,12 @@
-package nl.soqua.lcpi.interpreter
+package nl.soqua.lcpi.repl
 
+import nl.soqua.lcpi.interpreter.{Context, Interpreter}
 import nl.soqua.lcpi.interpreter.transformation.Stringify
 
 object Main extends App {
   var ctx = CombinatorLibrary loadIn Context()
 
-  def drawShell(): Unit = print("λ ")
+  def drawShell(): Unit = print("lcpi λ> ")
 
   println(
     """

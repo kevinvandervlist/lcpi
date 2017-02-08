@@ -23,12 +23,12 @@ class InterpreterSpec extends InterpreterTester with WordSpecLike with Matchers 
   }
   "Evaluation with tracing mode" should {
     "Yield a list of intermediate steps" in {
-      implicit val ctx: Context = CombinatorLibrary.loadIn(Context())
+      implicit val ctx: Context = Context()
       val _a = V("a")
+      "I := λx.x" >> "λx.x"
       Interpreter.trace(ctx, "(I λx.x) z") match {
         case Left(e) => fail(e.message)
         case Right(expressions) => expressions shouldBe List(
-          "S" -> A(A(V("I"), λ(x, x)), z),
           "S" -> A(A(λ(x, x), λ(x, x)), z),
           "α" -> A(A(λ(x, x), λ(_a, _a)), z),
           "β" -> A(λ(_a, _a), z),
@@ -57,10 +57,15 @@ class InterpreterSpec extends InterpreterTester with WordSpecLike with Matchers 
     }
   }
   "Evaluation with the usage of variables" should {
-    implicit val ctx: Context = CombinatorLibrary.loadIn(Context())
+    implicit val ctx: Context = Context()
     "evaluate using the stored identity function" in {
+      "I := λx.x" >> "λx.x"
       "I z" >> z
+    }
+    "yield I from S K K (combinator calculus)" in {
+      "K := λx.λy.x" >> "λx.λy.x"
+      "S := λx.λy.λz.x z (y z)" >> "λx.λy.λz.x z (y z)"
+      "S K K" >> "I"
     }
   }
 }
-

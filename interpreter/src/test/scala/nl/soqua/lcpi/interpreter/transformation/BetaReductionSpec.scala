@@ -31,5 +31,8 @@ class BetaReductionSpec extends WordSpec with Matchers {
     "do multi-step β reduction" in {
       β(A(λ(x, x), A(λ(x, x), x))) shouldBe x
     }
+    "stop recursing at a certain moment on a expression that β-reduces infinitely" in {
+      βtrace(λ(f, A(λ(x, A(f, A(x, x))), λ(x, A(f, A(x, x)))))) should have length BetaReduction.maxDepth
+    }
   }
 }

@@ -1,6 +1,7 @@
 package nl.soqua.lcpi.interpreter
 
 import nl.soqua.lcpi.ast.interpreter.Assignment
+import nl.soqua.lcpi.ast.interpreter.ReplExpression._
 import nl.soqua.lcpi.ast.lambda.Expression
 import nl.soqua.lcpi.parser.ParserError
 import nl.soqua.lcpi.parser.repl.ReplParser
@@ -19,7 +20,7 @@ object Interpreter {
       .right
       .flatMap({
         case Assignment(v, _) if ctx.contains(v) => Left(existingVarError)
-        case Assignment(v, expr) => ctx.assign(v, expr.expression); Right(expr.expression)
+        case Assignment(v, expr) => ctx.assign(v, expr); Right(re2e(expr))
         case nl.soqua.lcpi.ast.interpreter.Expression(expr) => Right(expr)
       }).left
       .map({

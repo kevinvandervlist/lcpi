@@ -13,7 +13,7 @@ lazy val commonSettings = Seq(
     "-unchecked"
   ),
   libraryDependencies ++= Seq(
-	  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
+    "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
     "org.scalatest" %% "scalatest" % "3.0.0" % "test"
   )
 )
@@ -36,6 +36,13 @@ lazy val interpreter = (project in file("interpreter")).
   settings(commonSettings: _*).
   settings(
     name := "interpreter",
-    assemblyJarName in assembly := "interpreter.jar",
-    mainClass in assembly := Some("nl.soqua.lcpi.interpreter.Main")
+    assemblyJarName in assembly := "interpreter.jar"
   ).dependsOn(ast, parser)
+
+lazy val repl = (project in file("repl")).
+  settings(commonSettings: _*).
+  settings(
+    name := "repl",
+    assemblyJarName in assembly := "repl.jar",
+    mainClass in assembly := Some("nl.soqua.lcpi.repl.Main")
+  ).dependsOn(ast, parser, interpreter)

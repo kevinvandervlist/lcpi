@@ -1,6 +1,7 @@
-package nl.soqua.lcpi.interpreter
+package nl.soqua.lcpi.repl
 
 import nl.soqua.lcpi.ast.interpreter.Assignment
+import nl.soqua.lcpi.interpreter.Context
 import nl.soqua.lcpi.parser.repl.ReplParser
 
 object CombinatorLibrary {

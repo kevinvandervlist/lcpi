@@ -6,9 +6,9 @@ object BetaReduction {
 
   import Substitution.substitute
 
-  private val maxdepth = 150 // a rather arbitrary max depth for β-reduction
+  private[transformation] val maxDepth = 250 // a rather arbitrary max depth for β-reduction
 
-  def βtrace(e: Expression): List[Expression] = βtrace(e: Expression, maxdepth)
+  def βtrace(e: Expression): List[Expression] = βtrace(e: Expression, maxDepth)
 
   private def βtrace(e: Expression, depth: Int): List[Expression] = βReduction(e) match {
     case _ if depth == 0 => List.empty
@@ -22,7 +22,7 @@ object BetaReduction {
     * @param e
     * @return
     */
-  def β(e: Expression): Expression = β(e, maxdepth)
+  def β(e: Expression): Expression = β(e, maxDepth)
 
   private def β(e: Expression, depth: Int): Expression = βReduction(e) match {
     case x if depth == 0 => x

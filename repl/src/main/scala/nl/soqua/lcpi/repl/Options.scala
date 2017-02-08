@@ -1,4 +1,4 @@
-package nl.soqua.lcpi.interpreter
+package nl.soqua.lcpi.repl
 
 sealed trait Options
 
