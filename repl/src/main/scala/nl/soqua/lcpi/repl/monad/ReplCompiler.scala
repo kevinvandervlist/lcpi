@@ -1,20 +1,24 @@
 package nl.soqua.lcpi.repl.monad
 
 import cats.~>
-import nl.soqua.lcpi.ast.interpreter.ReplExpression
+import nl.soqua.lcpi.ast.interpreter.{Assignment, ReplExpression}
 import nl.soqua.lcpi.ast.lambda.{Expression, Variable}
 import nl.soqua.lcpi.interpreter._
 import nl.soqua.lcpi.interpreter.transformation.Stringify
+import nl.soqua.lcpi.parser.repl.ReplParser
 import nl.soqua.lcpi.repl.Messages
-import nl.soqua.lcpi.repl.lib.CombinatorLibrary
+import nl.soqua.lcpi.repl.lib.{CombinatorLibrary, DiskIO}
 
 import scala.collection.mutable
+import scala.util.{Failure, Success}
 
 object ReplCompiler {
 
   import cats.data.State
 
   type PureReplState[A] = State[ReplState, A]
+
+  type alias = ReplMonadA ~> PureReplState
 
   private val lb: String = System.lineSeparator()
 
@@ -28,7 +32,7 @@ object ReplCompiler {
   private def renderContext(acc: mutable.StringBuilder, v: Variable, e: Expression): mutable.StringBuilder =
     acc.append(s"${Stringify(v)} := ${Stringify(e)}$lb")
 
-  val pureCompiler: ReplMonadA ~> PureReplState = new (ReplMonadA ~> PureReplState) {
+  def compiler(disk: DiskIO): alias = new (alias) {
     def apply[A](fa: ReplMonadA[A]): PureReplState[A] = {
       fa match {
         case Help => State.pure(Messages.help);
@@ -50,6 +54,19 @@ object ReplCompiler {
               case Right(result) => (s.copy(context = result.context), renderEvaluationResult(result))
             }
           })
+        case LoadFile(path) => disk.load(path) match {
+          case Failure(ex) => State.pure(s"Failed to load `$path`: ${ex.getMessage}")
+          case Success(stream) => State(s => {
+            val ctx = stream
+              .filterNot(l => l.startsWith("#")) // Skip 'comments'
+              .map(l => ReplParser(l))
+              .collect {
+                case Right(Assignment(v, e)) => (v, e)
+              }
+              .foldLeft(s.context)((acc, t) => acc.assign(t._1, t._2))
+            (s.copy(context = ctx), s"Successfully loaded file `$path`")
+          })
+        }
       }
     }
   }
