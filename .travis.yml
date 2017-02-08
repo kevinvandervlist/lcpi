@@ -5,3 +5,5 @@ jdk:
   - oraclejdk8
 scala:
   - 2.12.1
+after_success:
+  - sbt coveralls

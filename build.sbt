@@ -15,7 +15,9 @@ lazy val commonSettings = Seq(
   libraryDependencies ++= Seq(
     "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
     "org.scalatest" %% "scalatest" % "3.0.0" % "test"
-  )
+  ),
+  // Exclude the *repl* package from coverage reports
+  coverageExcludedPackages := "nl.soqua.lcpi.repl.*"
 )
 
 lazy val ast = (project in file("ast")).
