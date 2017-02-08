@@ -50,6 +50,11 @@ class InterpreterSpec extends InterpreterTester with WordSpecLike with Matchers 
       }
       "MYVAR z" >> z
     }
+    "reject them when the assignments are (partially) lower case" in {
+      assertThrows[TestFailedException] {
+        "Foo := x" >> "x"
+      }
+    }
     "deal with parser errors" in {
       assertThrows[TestFailedException] {
         "function(x) { return x; }" >> ""

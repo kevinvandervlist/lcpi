@@ -2,7 +2,7 @@ package nl.soqua.lcpi.interpreter
 
 import nl.soqua.lcpi.ast.interpreter.Assignment
 import nl.soqua.lcpi.ast.interpreter.ReplExpression._
-import nl.soqua.lcpi.ast.lambda.Expression
+import nl.soqua.lcpi.ast.lambda.{Expression, Variable}
 import nl.soqua.lcpi.parser.ParserError
 import nl.soqua.lcpi.parser.repl.ReplParser
 
@@ -13,13 +13,16 @@ object Interpreter {
 
   import transformation._
 
-  private val existingVarError = InterpreterError("The given variable has already been assigned in the context")
+  private def existingVarError(v: Variable) = InterpreterError(s"The variable '${v.symbol}' has already been assigned in the context")
+
+  private def capitalizationRequired(v: Variable) = InterpreterError(s"The variable '${v.symbol}' should be fully capitalized")
 
   private def inputAsExpressionWithImmutableInput(ctx: Context, line: String): Either[InterpreterError, Expression] =
     ReplParser(line)
       .right
       .flatMap({
-        case Assignment(v, _) if ctx.contains(v) => Left(existingVarError)
+        case Assignment(v, _) if v.symbol.toUpperCase() != v.symbol => Left(capitalizationRequired(v))
+        case Assignment(v, _) if ctx.contains(v) => Left(existingVarError(v))
         case Assignment(v, expr) => ctx.assign(v, expr); Right(re2e(expr))
         case nl.soqua.lcpi.ast.interpreter.Expression(expr) => Right(expr)
       }).left
@@ -58,7 +61,7 @@ object Interpreter {
   } yield i
 
   def trace(ctx: Context, term: Expression): Either[InterpreterError, List[(String, Expression)]] = {
-    var (out, expression) = substituteFromContext(ctx, term)
+    var (out, expression) = substituteFromContextDeclarations(ctx, term)
 
     expression = α(expression)
     out += (("α", expression))
@@ -72,7 +75,7 @@ object Interpreter {
     Right(out.toList)
   }
 
-  private def substituteFromContext(ctx: Context, term: Expression): (mutable.ListBuffer[(String, Expression)], Expression) = {
+  private def substituteFromContextDeclarations(ctx: Context, term: Expression): (mutable.ListBuffer[(String, Expression)], Expression) = {
     var out: mutable.ListBuffer[(String, Expression)] = ListBuffer.empty
 
     var changing = true
