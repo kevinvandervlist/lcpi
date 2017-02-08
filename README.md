@@ -1,9 +1,50 @@
-# Simple lambda calculus parser and interpreter
+# LCPI: an untyped Lambda Calculus Parser and Interpreter
 
-* Lambda is either a `λ` or a `\ `, so `\x.x` and `λx.x` are identical
+[![Build Status](https://travis-ci.org/kevinvandervlist/lcpi.svg?branch=master)](https://travis-ci.org/kevinvandervlist/lcpi)
+[![Coverage Status](https://coveralls.io/repos/github/kevinvandervlist/lcpi/badge.svg)](https://coveralls.io/github/kevinvandervlist/lcpi)
+
+This provides a parser and interpreter and REPL for the untyped lambda calculus. 
+The REPL has tracing capabilities to show all intermediate reduction steps.
+Among others, the following features are supported:
+
+* Lambda is either a `λ` or a `\ `, so `\x.x` and `λx.x` are identical.
+* There is a shorthand available for nesting, so `λx y z.x y z` is equal to `λx.λy.λz.x y z`.
+* The parser is fully left-associative, so `x y z` is `(x y) z`.
+* The REPL can toggle between a normal and a *tracing* mode, showing all intermediate reduction steps.
+* Although not supported in pure λ-calculus, one can use the REPL to assign expressions to variables. These will be substituted before running the α-reduction.
+* A few well-known functions are added by default for convenience (e.g. I, Y, TRUE etc).
+* Run `help` in the REPL for additional information.
+
+## running the REPL:
+* `sbt run`
+
+## Building (and testing) the REPL
 * `sbt test`
 * `sbt assembly`
-* `sbt run` or `java -jar interpreter/target/scala-2.12/interpreter.jar`
+* `java -jar repl/target/scala-2.12/repl.jar`
+
+## Demo: derive I from S and K
+
+```
+╭─kevin@Asus15  ~/src/lcpi  ‹master*›
+╰─$ sbt run
+[...]
+
+lcpi λ> show
+[...]
+S := (λx.(λy.(λz.((x z) (y z)))))
+K := (λx.(λy.x))
+lcpi λ> S K K
+S => ((S K) K)
+S => (((λx.(λy.(λz.((x z) (y z))))) K) K)
+S => (((λx.(λy.(λz.((x z) (y z))))) (λx.(λy.x))) (λx.(λy.x)))
+α => (((λx.(λy.(λz.((x z) (y z))))) (λa.(λb.a))) (λc.(λd.c)))
+β => ((λy.(λz.(((λa.(λb.a)) z) (y z)))) (λc.(λd.c)))
+β => (λz.(((λa.(λb.a)) z) ((λc.(λd.c)) z)))
+β => (λz.((λb.z) (λd.z)))
+β => (λz.z)
+η => (λz.z)
+```
 
 ## Demo: successor
 
@@ -14,17 +55,17 @@
 
 A λ-calculus interpreter. Type `help` for usage information.
     
-λ ZERO := λf.λx.x
+lcpi λ> ZERO := λf.λx.x
 (λf.(λx.x))
-λ SUCCESSOR := λn.λf.λx.f (n f x)
+lcpi λ> SUCCESSOR := λn.λf.λx.f (n f x)
 (λn.(λf.(λx.(f ((n f) x)))))
-λ SUCCESSOR ZERO
+lcpi λ> SUCCESSOR ZERO
 (λf.(λx.(f x)))
-λ SUCCESSOR (SUCCESSOR ZERO)
+lcpi λ> SUCCESSOR (SUCCESSOR ZERO)
 (λf.(λx.(f (f x))))
-λ trace
+lcpi λ> trace
 Trace mode is now on.
-λ SUCCESSOR (SUCCESSOR ZERO)
+lcpi λ> SUCCESSOR (SUCCESSOR ZERO)
 S => (SUCCESSOR (SUCCESSOR ZERO))
 S => ((λn.(λf.(λx.(f ((n f) x))))) ((λn.(λf.(λx.(f ((n f) x))))) ZERO))
 S => ((λn.(λf.(λx.(f ((n f) x))))) ((λn.(λf.(λx.(f ((n f) x))))) (λf.(λx.x))))
@@ -36,36 +77,30 @@ S => ((λn.(λf.(λx.(f ((n f) x))))) ((λn.(λf.(λx.(f ((n f) x))))) (λf.(λx
 β => (λf.(λx.(f (f ((λe.e) x)))))
 β => (λf.(λx.(f (f x))))
 η => (λf.(λx.(f (f x))))
-λ I x
-S => (I x)
-S => ((λx.x) x)
-α => ((λx.x) x)
-β => x
-η => x
 ```
 
-## Demo: summation
+## Demo: summation of positive natural numbers
 ```
-λ ZERO := λf.λx.x
+lcpi λ> ZERO := λf.λx.x
 (λf.(λx.x))
-λ SUCCESSOR := λn.λf.λx.f (n f x)
+lcpi λ> SUCCESSOR := λn.λf.λx.f (n f x)
 (λn.(λf.(λx.(f ((n f) x)))))
-λ ONE := SUCCESSOR ZERO
+lcpi λ> ONE := SUCCESSOR ZERO
 (λf.(λx.(f x)))
-λ TWO := SUCCESSOR ONE
+lcpi λ> TWO := SUCCESSOR ONE
 (λf.(λx.(f (f x))))
-λ THREE := SUCCESSOR TWO
+lcpi λ> THREE := SUCCESSOR TWO
 (λf.(λx.(f (f (f x)))))
-λ ISZERO := λn.n (λx.FALSE) TRUE
+lcpi λ> ISZERO := λn.n (λx.FALSE) TRUE
 (λn.((n (λx.(λa.(λy.y)))) (λb.(λc.b))))
-λ PLUS := λm.λn.m SUCCESSOR n
+lcpi λ> PLUS := λm.λn.m SUCCESSOR n
 (λm.(λn.((m (λa.(λf.(λx.(f ((a f) x)))))) n)))
-λ PREDECESSOR := λn.n (λg.λk.ISZERO (g ONE) k (PLUS (g k) ONE)) (λv.ZERO) ZERO
+lcpi λ> PREDECESSOR := λn.n (λg.λk.ISZERO (g ONE) k (PLUS (g k) ONE)) (λv.ZERO) ZERO
 (λn.(((n (λg.(λk.(((((g (λf.(λh.(f h)))) (λx.(λb.(λy.y)))) (λc.(λd.c))) k) (((g k) (λo.(λp.(λq.(p ((o p) q)))))) (λs.(λt.(s t)))))))) (λw.(λz.(λx0.x0)))) (λf0.(λx1.x1))))
-λ PARTIALSUMMATION := (λf.λn.(ISZERO n) ZERO (PLUS n (f (PREDECESSOR n))))
+lcpi λ> PARTIALSUMMATION := (λf.λn.(ISZERO n) ZERO (PLUS n (f (PREDECESSOR n))))
 (λf.(λn.((((n (λx.(λb.(λy.y)))) (λc.(λd.c))) (λe.(λg.g))) ((n (λi.(λj.(λk.(j ((i j) k)))))) (f (((n (λo.(λp.(((((o (λz.(λx0.(z x0)))) (λr.(λs.(λt.t)))) (λu.(λv.u))) p) (((o p) (λn1.(λf1.(λx2.(f1 ((n1 f1) x2)))))) (λf2.(λx3.(f2 x3)))))))) (λv0.(λf4.(λx5.x5)))) (λf5.(λx6.x6))))))))
-λ SUMMATION := Y PARTIALSUMMATION
+lcpi λ> SUMMATION := Y PARTIALSUMMATION 
 [...] // really, really long λ-expression
-λ SUMMATION THREE
+lcpi λ> SUMMATION THREE
 (λo.(λp.(o (o (o (o (o (o p))))))))
 ```
