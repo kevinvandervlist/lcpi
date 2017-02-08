@@ -16,7 +16,8 @@ Among others, the following features are supported:
 * Run `help` in the REPL for additional information.
 
 ## running the REPL:
-* `sbt run`
+* You can download [the latest release](https://github.com/kevinvandervlist/lcpi/releases/latest).
+* Or clone the repo and `sbt run` it.
 
 ## Building (and testing) the REPL
 * `sbt test`
