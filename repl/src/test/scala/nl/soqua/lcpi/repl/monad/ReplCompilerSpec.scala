@@ -23,6 +23,9 @@ class ReplCompilerSpec extends WordSpecLike with Matchers {
   val emptyState: ReplState = ReplState.empty
 
   "A repl compiler" should {
+    val failed = new DiskIO {
+      override def load(path: String): Try[Stream[String]] = Failure(new IllegalArgumentException("failed"))
+    }
     implicit val compiler = ReplCompiler.compiler(new DiskIO {
       override def load(path: String): Try[Stream[String]] = Try {
         List(
@@ -79,14 +82,19 @@ class ReplCompilerSpec extends WordSpecLike with Matchers {
     "Load a file" in {
       val c = CombinatorLibrary.loadIn(Context()).assign(Variable("FOO"), Variable("x"))
       ReplMonad.load("foo") >> "Successfully loaded file `foo`"
-      ReplMonad.load("foo") >> emptyState.copy(context = c)
+      ReplMonad.load("foo") >> emptyState.copy(context = c, reloadableFile = Some("foo"))
     }
     "Fail to load a file" in {
-      implicit val compiler = ReplCompiler.compiler(new DiskIO {
-        override def load(path: String): Try[Stream[String]] = Failure(new IllegalArgumentException("failed"))
-      })
+      implicit val compiler = ReplCompiler.compiler(failed)
       ReplMonad.load("foo") >> "Failed to load `foo`: failed"
       ReplMonad.load("foo") >> emptyState
+    }
+    "Reload a loaded file" in {
+      implicit val state = emptyState.copy(reloadableFile = Some("bar"))
+      ReplMonad.reload() >> "Successfully reloaded file `bar`"
+    }
+    "Fail to reload when no file is loaded yet" in {
+      ReplMonad.reload() >> "Failed to reload: no file has been loaded yet"
     }
   }
 }
