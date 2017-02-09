@@ -30,7 +30,7 @@ object ReplCompiler {
   }
 
   private def renderContext(acc: mutable.StringBuilder, v: Variable, e: Expression): mutable.StringBuilder =
-    acc.append(s"${Stringify(v)} := ${Stringify(e)}$lb")
+    acc.append(f"${Stringify(v)}%10s := ${Stringify(e)}%s$lb%s")
 
   private def loadContextFromFile(stream: Stream[String], ctx: Context): Context = stream
     .filterNot(l => l.startsWith("#")) // Skip 'comments'

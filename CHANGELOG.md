@@ -1,3 +1,14 @@
+<a name="1.0.2"></a>
+# [1.0.1](https://github.com/kevinvandervlist/lcpi/compare/v1.0.1...v1.0.2) (2017-01-01)
+
+### Bug Fixes
+
+* 
+
+### Features
+
+* [todo](https://github.com/kevinvandervlist/lcpi/commit/) Sort REPL assignments alphabetically and indent them with 10 chars.
+
 <a name="1.0.1"></a>
 # [1.0.1](https://github.com/kevinvandervlist/lcpi/compare/v1.0.0...v1.0.1) (2017-02-08)
 
