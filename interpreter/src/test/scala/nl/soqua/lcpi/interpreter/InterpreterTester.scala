@@ -1,6 +1,7 @@
 package nl.soqua.lcpi.interpreter
 
 import nl.soqua.lcpi.ast.interpreter.ReplExpression
+import nl.soqua.lcpi.ast.interpreter.ReplExpression._
 import nl.soqua.lcpi.ast.lambda.{Expression, Variable}
 import nl.soqua.lcpi.interpreter.transformation.{DeBruijnIndex, Stringify}
 import nl.soqua.lcpi.parser.repl.ReplParser
@@ -67,6 +68,12 @@ trait InterpreterTester {
       })
     }
 
+    def parse(implicit ctx: Context): (Context, ReplExpression) = {
+      Interpreter(ctx, expr).fold(ex => {
+        fail(s"Parse of expression $expr failed: $ex")
+      }, e => (e.context, e.expression))
+    }
+
     /**
       * Assert equality given an expression str that will be parsed and compared to the 'actual' result
       * (e.g. the left hand side). Equality is determined by writing the expressions in De Bruijn Index form
@@ -79,6 +86,15 @@ trait InterpreterTester {
       .fold(ex => {
         fail(s"Parsing of expected expression $expectedExpression failed: $ex")
       }, result => >>(result.expression))
+  }
+
+  protected implicit class ListParserAndInterpreter(val expr: List[String]) extends Matchers {
+    def parse(implicit ctx: Context): (Context, List[ReplExpression]) = expr.foldLeft((ctx, List.empty[ReplExpression]))((t, str) => t match {
+      case (c, elems) => Interpreter(c, str) match {
+        case Left(_) => c -> elems
+        case Right(r) => r.context -> (elems :+ e2re(r.expression))
+      }
+    })
   }
 
 }

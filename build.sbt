@@ -60,4 +60,4 @@ lazy val repl = (project in file("repl")).
       "org.typelevel" %% "cats-free" % catsVersion
     ),
     mainClass in assembly := Some("nl.soqua.lcpi.repl.Main")
-  ).dependsOn(ast, parser, interpreter)
+  ).dependsOn(ast, parser, interpreter % "test->test;compile->compile")
