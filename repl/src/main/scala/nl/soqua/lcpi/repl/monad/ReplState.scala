@@ -10,7 +10,7 @@ private[monad] case object Enabled extends TraceModePosition
 private[monad] case object Disabled extends TraceModePosition
 
 object ReplState {
-  val empty: ReplState = ReplState(CombinatorLibrary.loadIn(Context()), traceMode = Disabled, terminated = false, None)
+  val empty: ReplState = ReplState(CombinatorLibrary.loadIn(Context()), traceMode = Disabled, terminated = false, List.empty)
 }
 
-case class ReplState(context: Context, traceMode: TraceModePosition, terminated: Boolean, reloadableFile: Option[String])
+case class ReplState(context: Context, traceMode: TraceModePosition, terminated: Boolean, reloadableFiles: List[String])

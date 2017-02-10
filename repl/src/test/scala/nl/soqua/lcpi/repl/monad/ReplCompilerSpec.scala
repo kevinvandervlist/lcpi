@@ -71,10 +71,10 @@ class ReplCompilerSpec extends ReplMonadTester with WordSpecLike with Matchers {
     "load a file" in {
       val c = CombinatorLibrary.loadIn(Context()).assign(Variable("FOO"), Variable("x"))
       ReplMonad.load("foo") >> "Successfully loaded file `foo`"
-      ReplMonad.load("foo") >> emptyState.copy(context = c, reloadableFile = Some("foo"))
+      ReplMonad.load("foo") >> emptyState.copy(context = c, reloadableFiles = emptyState.reloadableFiles :+ "foo")
     }
     "reload a loaded file" in {
-      implicit val state = emptyState.copy(reloadableFile = Some("bar"))
+      implicit val state = emptyState.copy(reloadableFiles = emptyState.reloadableFiles :+ "bar")
       ReplMonad.reload() >> "Successfully reloaded file `bar`"
     }
     "fail to reload when no file is loaded yet" in {
@@ -89,7 +89,7 @@ class ReplCompilerSpec extends ReplMonadTester with WordSpecLike with Matchers {
       ReplMonad.load("foo") >> emptyState
     }
     "load a file, then fail to reload it again" in {
-      implicit val state = emptyState.copy(reloadableFile = Some("foo"))
+      implicit val state = emptyState.copy(reloadableFiles = emptyState.reloadableFiles :+ "foo")
       ReplMonad.reload() >> "Failed to reload `foo`: failed"
     }
   }

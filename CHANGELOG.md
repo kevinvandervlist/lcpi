@@ -8,6 +8,7 @@
 ### Features
 
 * [todo](https://github.com/kevinvandervlist/lcpi/commit/) Sort REPL assignments alphabetically and indent them with 10 chars.
+* [todo](https://github.com/kevinvandervlist/lcpi/commit/) Reload all files instead of the last one.
 
 <a name="1.0.1"></a>
 # [1.0.1](https://github.com/kevinvandervlist/lcpi/compare/v1.0.0...v1.0.1) (2017-02-08)

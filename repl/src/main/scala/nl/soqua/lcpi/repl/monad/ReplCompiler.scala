@@ -55,17 +55,25 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
   override protected def load(file: String): PureReplState[String] = readFile(file) match {
     case Failure(ex) => State.pure(s"Failed to load `$file`: ${ex.getMessage}")
     case Success(stream) => State(s => {
-      (s.copy(context = loadContextFromFile(stream, s.context), reloadableFile = Some(file)), s"Successfully loaded file `$file`")
+      if(s.reloadableFiles.contains(file)) {
+        (s, s"File `$file` is already loaded.")
+      } else {
+        (s.copy(context = loadContextFromFile(stream, s.context), reloadableFiles = s.reloadableFiles :+ file), s"Successfully loaded file `$file`")
+      }
     })
   }
 
   override protected def reload(): PureReplState[String] = State(s => {
-    s.reloadableFile match {
-      case None => (s, "Failed to reload: no file has been loaded yet")
-      case Some(path) => readFile(path) match {
-        case Failure(ex) => (s, s"Failed to reload `$path`: ${ex.getMessage}")
-        case Success(stream) => (s.copy(context = loadContextFromFile(stream, s.context)), s"Successfully reloaded file `$path`")
-      }
+    if(s.reloadableFiles.isEmpty) {
+      (s, "Failed to reload: no file has been loaded yet")
+    } else {
+      val newContext = s.reloadableFiles.foldLeft((s.context, List.empty[String]))((acc, file) => acc match {
+        case (ctx, out) => readFile(file) match {
+          case Failure(ex) => (ctx, out :+ s"Failed to reload `$file`: ${ex.getMessage}")
+          case Success(stream) => (loadContextFromFile(stream, ctx), out :+ s"Successfully reloaded file `$file`")
+        }
+      })
+      (s.copy(context = newContext._1), newContext._2.mkString(lb))
     }
   })
 
