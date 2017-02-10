@@ -1,5 +1,5 @@
 <a name="1.0.2"></a>
-# [1.0.1](https://github.com/kevinvandervlist/lcpi/compare/v1.0.1...v1.0.2) (2017-01-01)
+# [1.0.2](https://github.com/kevinvandervlist/lcpi/compare/v1.0.1...v1.0.2) (2017-01-01)
 
 ### Bug Fixes
 
@@ -7,8 +7,8 @@
 
 ### Features
 
-* [todo](https://github.com/kevinvandervlist/lcpi/commit/) Sort REPL assignments alphabetically and indent them with 10 chars.
-* [todo](https://github.com/kevinvandervlist/lcpi/commit/) Reload all files instead of the last one.
+* [2c5aad9](https://github.com/kevinvandervlist/lcpi/commit/2c5aad93cdaeaaac018f1e0328e886ff4960d4ef) Sort REPL assignments alphabetically and indent them with 10 chars.
+* [7c59ffd](https://github.com/kevinvandervlist/lcpi/commit/7c59ffdb4eeb5374408d595b93f0eaef79c7eb0f) Reload all files instead of the last one.
 
 <a name="1.0.1"></a>
 # [1.0.1](https://github.com/kevinvandervlist/lcpi/compare/v1.0.0...v1.0.1) (2017-02-08)

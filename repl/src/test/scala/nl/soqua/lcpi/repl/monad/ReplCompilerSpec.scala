@@ -73,6 +73,15 @@ class ReplCompilerSpec extends ReplMonadTester with WordSpecLike with Matchers {
       ReplMonad.load("foo") >> "Successfully loaded file `foo`"
       ReplMonad.load("foo") >> emptyState.copy(context = c, reloadableFiles = emptyState.reloadableFiles :+ "foo")
     }
+    "not load the same file twice" in {
+      val c = CombinatorLibrary.loadIn(Context()).assign(Variable("FOO"), Variable("x"))
+      val cmd = for {
+        _ <- ReplMonad.load("foo")
+        loadcmd <- ReplMonad.load("foo")
+      } yield loadcmd
+      cmd >> "File `foo` is already loaded."
+      cmd >> emptyState.copy(context = c, reloadableFiles = emptyState.reloadableFiles :+ "foo")
+    }
     "reload a loaded file" in {
       implicit val state = emptyState.copy(reloadableFiles = emptyState.reloadableFiles :+ "bar")
       ReplMonad.reload() >> "Successfully reloaded file `bar`"
