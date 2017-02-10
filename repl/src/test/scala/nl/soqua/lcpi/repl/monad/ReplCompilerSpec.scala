@@ -11,14 +11,17 @@ import scala.util.Try
 
 class ReplCompilerSpec extends ReplMonadTester with WordSpecLike with Matchers {
 
-  "A repl compiler" should {
-    implicit val compiler = ReplCompiler.compiler(new DiskIO {
-      override def load(path: String): Try[Stream[String]] = Try {
+  "A repl compiler with proper diskio" should {
+    val compiler = new DiskIO() with ReplCompiler {
+      override def readFile(path: String): Try[Stream[String]] = Try {
         List(
           "FOO := x"
         ).toStream
       }
-    })
+    }
+
+    implicit val compile: ReplCompilerDefinition.alias = compiler.compile
+
     implicit val state: ReplState = emptyState
     "provide the user with usage information" in {
       ReplMonad.help() >> Messages.help
@@ -70,11 +73,6 @@ class ReplCompilerSpec extends ReplMonadTester with WordSpecLike with Matchers {
       ReplMonad.load("foo") >> "Successfully loaded file `foo`"
       ReplMonad.load("foo") >> emptyState.copy(context = c, reloadableFile = Some("foo"))
     }
-    "fail to load a file" in {
-      implicit val compiler = ReplCompiler.compiler(failedDiskIO)
-      ReplMonad.load("foo") >> "Failed to load `foo`: failed"
-      ReplMonad.load("foo") >> emptyState
-    }
     "reload a loaded file" in {
       implicit val state = emptyState.copy(reloadableFile = Some("bar"))
       ReplMonad.reload() >> "Successfully reloaded file `bar`"
@@ -82,8 +80,15 @@ class ReplCompilerSpec extends ReplMonadTester with WordSpecLike with Matchers {
     "fail to reload when no file is loaded yet" in {
       ReplMonad.reload() >> "Failed to reload: no file has been loaded yet"
     }
+  }
+  "A repl compiler with failing disk io" should {
+    implicit val compiler: ReplCompilerDefinition.alias = failCompiler.compile
+    implicit val state: ReplState = emptyState
+    "fail to load a file" in {
+      ReplMonad.load("foo") >> "Failed to load `foo`: failed"
+      ReplMonad.load("foo") >> emptyState
+    }
     "load a file, then fail to reload it again" in {
-      implicit val compiler = ReplCompiler.compiler(failedDiskIO)
       implicit val state = emptyState.copy(reloadableFile = Some("foo"))
       ReplMonad.reload() >> "Failed to reload `foo`: failed"
     }

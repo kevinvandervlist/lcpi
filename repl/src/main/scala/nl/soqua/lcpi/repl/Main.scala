@@ -26,16 +26,16 @@ object Main extends App {
   var state = ReplState.empty
   var effect: Any = _
 
-  val compiler = ReplCompiler.compiler(new DiskIO() {
-    override def load(path: String): Try[Stream[String]] = Try {
+  val compiler = new DiskIO() with ReplCompiler {
+    override def readFile(path: String): Try[Stream[String]] = Try {
       Source.fromFile(new File(path)).getLines().toStream
     }
-  })
+  }
 
   for (ln <- io.Source.stdin.getLines) {
     StdInParser(ln) match {
       case Left(e) => println(e)
-      case Right(cmd) => cmd.foldMap(compiler).run(state).value match {
+      case Right(cmd) => cmd.foldMap(compiler.compile).run(state).value match {
         case (s: ReplState, _) if s.terminated =>
           System.exit(0)
         case (s: ReplState, effect: String) =>

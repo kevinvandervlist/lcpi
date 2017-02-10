@@ -11,14 +11,14 @@ class ReplScenariosSpec extends ReplMonadTester with InterpreterTester with Word
 
   implicit val emptyContext: Context = emptyState.context
 
-  val success = new DiskIO {
-    override def load(path: String): Try[Stream[String]] = Try {
+  val success = new DiskIO with ReplCompiler {
+    override def readFile(path: String): Try[Stream[String]] = Try {
       List.empty.toStream
     }
   }
 
   "Someone using the REPL" should {
-    implicit val compiler = ReplCompiler.compiler(success)
+    implicit val compiler = success.compile
     implicit val state: ReplState = emptyState
     "be able to evaluate a series of expressions that finally yield a single value" in {
       val (_, funcs) = List(
