@@ -1,5 +1,6 @@
 package nl.soqua.lcpi.repl.monad
 
+import cats.data.State
 import cats.~>
 import nl.soqua.lcpi.ast.interpreter.ReplExpression
 import nl.soqua.lcpi.repl.monad.ReplCompilerDefinition.{PureReplState, alias}
@@ -17,7 +18,8 @@ trait ReplCompilerDefinition {
 
   val compile: alias = new (alias) {
     def apply[A](fa: ReplMonadA[A]): PureReplState[A] = fa match {
-      case Help => help();
+      case Nothing => nothing()
+      case Help => help()
       case Quit => quit()
       case Reset => reset()
       case Show => show()
@@ -27,6 +29,8 @@ trait ReplCompilerDefinition {
       case Reload => reload()
     }
   }
+
+  private def nothing(): PureReplState[Unit] = State.modify(s => s)
 
   protected def help(): PureReplState[String]
 

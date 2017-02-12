@@ -5,6 +5,8 @@ import nl.soqua.lcpi.ast.interpreter.ReplExpression
 
 sealed trait ReplMonadA[A]
 
+private[monad] object Nothing extends ReplMonadA[Unit]
+
 case object Help extends ReplMonadA[String]
 
 case object Quit extends ReplMonadA[Unit]
@@ -23,6 +25,8 @@ case class Command(expression: ReplExpression) extends ReplMonadA[String]
 
 object ReplMonad {
   type Repl[A] = Free[ReplMonadA, A]
+
+  def nothing(): Repl[Unit] = Free.liftF[ReplMonadA, Unit](Nothing)
 
   def help(): Repl[String] = Free.liftF[ReplMonadA, String](Help)
 
