@@ -9,6 +9,7 @@
 
 * [2c5aad9](https://github.com/kevinvandervlist/lcpi/commit/2c5aad93cdaeaaac018f1e0328e886ff4960d4ef) Sort REPL assignments alphabetically and indent them with 10 chars.
 * [7c59ffd](https://github.com/kevinvandervlist/lcpi/commit/7c59ffdb4eeb5374408d595b93f0eaef79c7eb0f) Reload all files instead of the last one.
+* [#3](https://github.com/kevinvandervlist/lcpi/pull/3) Transitively load additional files if `load` commands are encounterd while reading files.
 
 <a name="1.0.1"></a>
 # [1.0.1](https://github.com/kevinvandervlist/lcpi/compare/v1.0.0...v1.0.1) (2017-02-08)

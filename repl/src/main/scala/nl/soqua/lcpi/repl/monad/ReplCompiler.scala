@@ -1,14 +1,15 @@
 package nl.soqua.lcpi.repl.monad
 
 import cats.data.State
-import nl.soqua.lcpi.ast.interpreter.{Assignment, ReplExpression}
+import nl.soqua.lcpi.ast.interpreter.ReplExpression
 import nl.soqua.lcpi.ast.lambda.{Expression, Variable}
 import nl.soqua.lcpi.interpreter._
 import nl.soqua.lcpi.interpreter.transformation.Stringify
-import nl.soqua.lcpi.parser.repl.ReplParser
 import nl.soqua.lcpi.repl.Messages
 import nl.soqua.lcpi.repl.lib.{CombinatorLibrary, DiskIO}
 import nl.soqua.lcpi.repl.monad.ReplCompilerDefinition.PureReplState
+import nl.soqua.lcpi.repl.monad.ReplMonad.Repl
+import nl.soqua.lcpi.repl.parser.StdInParser
 
 import scala.collection.mutable
 import scala.util.{Failure, Success}
@@ -27,13 +28,16 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
   private def renderContext(acc: mutable.StringBuilder, v: Variable, e: Expression): mutable.StringBuilder =
     acc.append(f"${Stringify(v)}%10s := ${Stringify(e)}%s$lb%s")
 
-  private def loadContextFromFile(stream: Stream[String], ctx: Context): Context = stream
+  private def streamCommands(stream: Stream[String]): Repl[_] = stream
     .filterNot(l => l.startsWith("#")) // Skip 'comments'
-    .map(l => ReplParser(l))
-    .collect {
-      case Right(Assignment(v, e)) => (v, e)
+    .map(l => StdInParser(l))
+    .map {
+      case Right(cmd) => cmd
+      case Left(_) => ReplMonad.nothing()
     }
-    .foldLeft(ctx)((acc, t) => acc.assign(t._1, t._2))
+    .foldRight(ReplMonad.nothing())((v, acc) => v match {
+      case cmd => cmd.flatMap(_ => acc)
+    })
 
   override protected def help(): PureReplState[String] =
     State.pure(Messages.help)
@@ -55,22 +59,30 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
   override protected def load(file: String): PureReplState[String] = readFile(file) match {
     case Failure(ex) => State.pure(s"Failed to load `$file`: ${ex.getMessage}")
     case Success(stream) => State(s => {
-      if(s.reloadableFiles.contains(file)) {
+      if (s.reloadableFiles.contains(file)) {
         (s, s"File `$file` is already loaded.")
       } else {
-        (s.copy(context = loadContextFromFile(stream, s.context), reloadableFiles = s.reloadableFiles :+ file), s"Successfully loaded file `$file`")
+        streamCommands(stream).foldMap(compile).run(s).value match {
+          case (newS, out: String) => (newS.copy(reloadableFiles = newS.reloadableFiles :+ file), s"${out}Successfully loaded file `$file`")
+          case (newS, out) => (newS.copy(reloadableFiles = newS.reloadableFiles :+ file), s"Successfully loaded file `$file`")
+        }
       }
     })
   }
 
   override protected def reload(): PureReplState[String] = State(s => {
-    if(s.reloadableFiles.isEmpty) {
+    if (s.reloadableFiles.isEmpty) {
       (s, "Failed to reload: no file has been loaded yet")
     } else {
       val newContext = s.reloadableFiles.foldLeft((s.context, List.empty[String]))((acc, file) => acc match {
         case (ctx, out) => readFile(file) match {
           case Failure(ex) => (ctx, out :+ s"Failed to reload `$file`: ${ex.getMessage}")
-          case Success(stream) => (loadContextFromFile(stream, ctx), out :+ s"Successfully reloaded file `$file`")
+          case Success(stream) =>
+            val program = streamCommands(stream)
+            program.foldMap(compile).run(s).value match {
+              case (newS, msgs: String) => (newS.context, out ++ List(msgs, s"Successfully reloaded file `$file`"))
+              case (newS, _) => (newS.context, out ++ List(s"Successfully reloaded file `$file`"))
+            }
         }
       })
       (s.copy(context = newContext._1), newContext._2.mkString(lb))
