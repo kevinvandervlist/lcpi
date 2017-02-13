@@ -54,5 +54,22 @@ class ReplScenariosSpec extends ReplMonadTester with InterpreterTester with Word
       p >> "b"
       p >> emptyState.copy(context = c, reloadableFiles = List("bar.lcpi", "foo.lcpi"))
     }
+    "loading files and then calling reset should yield a pristine state" in {
+      implicit val compiler = new DiskIO with ReplCompiler {
+        override def readFile(path: String): Try[Stream[String]] = Try {
+          path match {
+            case "foo.lcpi" => List("load bar.lcpi").toStream
+            case "bar.lcpi" => List("BAR := b").toStream
+            case _ => List.empty.toStream
+          }
+        }
+      }.compile
+      val p = for {
+        _ <- ReplMonad.load("foo.lcpi")
+        program <- ReplMonad.reset()
+      } yield program
+
+      p >> emptyState
+    }
   }
 }

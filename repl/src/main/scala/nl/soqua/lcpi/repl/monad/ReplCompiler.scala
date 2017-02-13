@@ -49,7 +49,7 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
     State.inspect(s => s.context.foldLeft(mutable.StringBuilder.newBuilder)(renderContext).toString().dropRight(lb.length))
 
   override protected def reset(): PureReplState[Unit] =
-    State.modify(s => s.copy(context = CombinatorLibrary.loadIn(Context())))
+    State.modify(_ => ReplState.empty)
 
   override protected def trace(): PureReplState[String] = State(s => s.traceMode match {
     case Enabled => (s.copy(traceMode = Disabled), Messages.traceModeDisabled)
