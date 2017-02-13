@@ -2,6 +2,7 @@ package nl.soqua.lcpi.repl.monad
 
 import nl.soqua.lcpi.ast.interpreter.Assignment
 import nl.soqua.lcpi.ast.lambda.{Application, Variable}
+import nl.soqua.lcpi.ast.lambda.Expression.{λ, V}
 import nl.soqua.lcpi.interpreter.Context
 import nl.soqua.lcpi.repl.Messages
 import nl.soqua.lcpi.repl.lib.{CombinatorLibrary, DiskIO}
@@ -96,6 +97,15 @@ class ReplCompilerSpec extends ReplMonadTester with WordSpecLike with Matchers {
     }
     "fail to reload when no file is loaded yet" in {
       ReplMonad.reload() >> "Failed to reload: no file has been loaded yet"
+    }
+    "render an expression in De Bruijn Index notation" in {
+      val x = V("x")
+      ReplMonad.deBruijnIndex(λ(x, x)) >> "(λ.1)"
+    }
+    "not be able to render a failure as de bruijn index" in {
+      val x = V("x")
+      val e = Assignment(V("I"), λ(x, x))
+      ReplMonad.deBruijnIndex(e) >> "The variable 'I' has already been assigned in the context"
     }
   }
   "A repl compiler with failing disk io" should {

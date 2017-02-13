@@ -15,7 +15,7 @@ trait StdInParserRules extends RegexParsers with PackratParsers {
   override val whiteSpace: Regex = "[\r\n]+".r
 
   lazy val line: P[Repl[_]] = {
-    help | quit | show | reset | trace | load | reload | command
+    help | quit | show | reset | trace | load | reload | deBruijnIndex | command
   }
 
   lazy val help: P[Repl[_]] = {
@@ -44,6 +44,13 @@ trait StdInParserRules extends RegexParsers with PackratParsers {
 
   lazy val reload: P[Repl[_]] = {
     "reload".r ^^ (_ => ReplMonad.reload())
+  }
+
+  lazy val deBruijnIndex: P[Repl[_]] = {
+    "dbi".r ~> ".*".r >> (v => ReplParser(v) match {
+      case Left(e) => failure(e.message)
+      case Right(e) => success(ReplMonad.deBruijnIndex(e))
+    })
   }
 
   lazy val command: P[Repl[_]] = {

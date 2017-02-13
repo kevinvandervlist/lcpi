@@ -4,7 +4,7 @@ import cats.data.State
 import nl.soqua.lcpi.ast.interpreter.ReplExpression
 import nl.soqua.lcpi.ast.lambda.{Expression, Variable}
 import nl.soqua.lcpi.interpreter._
-import nl.soqua.lcpi.interpreter.transformation.Stringify
+import nl.soqua.lcpi.interpreter.transformation.{DeBruijn, Stringify}
 import nl.soqua.lcpi.repl.Messages
 import nl.soqua.lcpi.repl.lib.DiskIO
 import nl.soqua.lcpi.repl.monad.ReplCompilerDefinition.PureReplState
@@ -91,7 +91,7 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
   })
 
   private def interpreterFunction(s: ReplState): (Context, ReplExpression) => Either[InterpreterError, InterpreterResult] = {
-    if(s.contextIsMutable) {
+    if (s.contextIsMutable) {
       Interpreter.mutableApply
     } else {
       s.traceMode match {
@@ -105,6 +105,13 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
     interpreterFunction(s)(s.context, expression) match {
       case Left(error) => (s, error.message)
       case Right(result) => (s.copy(context = result.context), renderEvaluationResult(result))
+    }
+  })
+
+  override protected def deBruijnIndex(expression: ReplExpression): PureReplState[String] = State(s => {
+    interpreterFunction(s)(s.context, expression) match {
+      case Left(error) => (s, error.message)
+      case Right(result) => (s, Stringify(DeBruijn.index(result.expression)))
     }
   })
 }

@@ -27,6 +27,7 @@ trait ReplCompilerDefinition {
       case Command(e) => command(e)
       case LoadFile(file) => load(file)
       case Reload => reload()
+      case DeBruijnIndex(e) => deBruijnIndex(e)
     }
   }
 
@@ -47,4 +48,6 @@ trait ReplCompilerDefinition {
   protected def reload(): PureReplState[String]
 
   protected def command(expression: ReplExpression): PureReplState[String]
+
+  protected def deBruijnIndex(expression: ReplExpression): PureReplState[String]
 }
