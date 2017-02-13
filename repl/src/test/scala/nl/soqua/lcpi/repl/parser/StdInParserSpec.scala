@@ -28,5 +28,13 @@ class StdInParserSpec extends StdInParserTester with WordSpecLike with Matchers 
         "# foo" >> ReplMonad.help()
       }
     }
+    "parse a De Bruijn Index command" in {
+      "dbi λx.x" >> ReplMonad.deBruijnIndex(LambdaAbstraction(Variable("x"), Variable("x")))
+    }
+    "don't parse an invalid De Bruijn Index command" in {
+      assertThrows[TestFailedException] {
+        "dbi # foo" >> ReplMonad.help()
+      }
+    }
   }
 }

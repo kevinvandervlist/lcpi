@@ -4,9 +4,9 @@ import nl.soqua.lcpi.ast.lambda.Expression.A
 import nl.soqua.lcpi.ast.lambda.{Expression, LambdaAbstraction, Variable}
 import org.scalatest.{Matchers, WordSpec}
 
-class DeBruijnIndexSpec extends WordSpec with Matchers {
+class DeBruijnSpec extends WordSpec with Matchers {
 
-  import DeBruijnIndex._
+  import DeBruijn._
 
   val _a = Expression.V("a")
   val b = Expression.V("b")
