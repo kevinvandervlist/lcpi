@@ -21,9 +21,12 @@ object Messages {
       |* `help` => show this message. Alias: `exit`.
       |* `quit` => quit the REPL.
       |* `show` => show the current REPL context.
-      |* `load <name>` => load a file based on the relative path ($relativePath). Lines starting with `#` are ignored
-      |* `trace` => toggle trace mode
+      |* `load <name>` => load a file based on the relative path ($relativePath). Lines starting with `#` are ignored.
+      |* `reload` => reload all files, overwriting any existing variables in the context if they already exist.
+      |* `trace` => toggle trace mode.
       |* `reset` => reset the current REPL context.
+      |* `<λ-expression>` => evaluate a λ-expression.
+      |* `dbi <λ-expression>` => evaluate a λ-expression and render the result in De Bruijn Index notation.
     """.stripMargin
   val traceModeEnabled: String = "Trace mode is now on."
   val traceModeDisabled: String = "Trace mode is now off."
