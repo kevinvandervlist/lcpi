@@ -6,7 +6,7 @@ import nl.soqua.lcpi.ast.lambda.{Expression, Variable}
 import nl.soqua.lcpi.interpreter._
 import nl.soqua.lcpi.interpreter.transformation.Stringify
 import nl.soqua.lcpi.repl.Messages
-import nl.soqua.lcpi.repl.lib.{CombinatorLibrary, DiskIO}
+import nl.soqua.lcpi.repl.lib.DiskIO
 import nl.soqua.lcpi.repl.monad.ReplCompilerDefinition.PureReplState
 import nl.soqua.lcpi.repl.monad.ReplMonad.Repl
 import nl.soqua.lcpi.repl.parser.StdInParser
@@ -70,10 +70,11 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
     })
   }
 
-  override protected def reload(): PureReplState[String] = State(s => {
-    if (s.reloadableFiles.isEmpty) {
-      (s, "Failed to reload: no file has been loaded yet")
+  override protected def reload(): PureReplState[String] = State(state => {
+    if (state.reloadableFiles.isEmpty) {
+      (state, "Failed to reload: no file has been loaded yet")
     } else {
+      val s = state.copy(contextIsMutable = true)
       val newContext = s.reloadableFiles.foldLeft((s.context, List.empty[String]))((acc, file) => acc match {
         case (ctx, out) => readFile(file) match {
           case Failure(ex) => (ctx, out :+ s"Failed to reload `$file`: ${ex.getMessage}")
@@ -85,16 +86,23 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
             }
         }
       })
-      (s.copy(context = newContext._1), newContext._2.mkString(lb))
+      (state.copy(context = newContext._1), newContext._2.mkString(lb))
     }
   })
 
-  override protected def command(expression: ReplExpression): PureReplState[String] = State(s => {
-    val fn: (Context, ReplExpression) => Either[InterpreterError, InterpreterResult] = s.traceMode match {
-      case Disabled => Interpreter.apply
-      case Enabled => Interpreter.trace
+  private def interpreterFunction(s: ReplState): (Context, ReplExpression) => Either[InterpreterError, InterpreterResult] = {
+    if(s.contextIsMutable) {
+      Interpreter.mutableApply
+    } else {
+      s.traceMode match {
+        case Disabled => Interpreter.apply
+        case Enabled => Interpreter.trace
+      }
     }
-    fn(s.context, expression) match {
+  }
+
+  override protected def command(expression: ReplExpression): PureReplState[String] = State(s => {
+    interpreterFunction(s)(s.context, expression) match {
       case Left(error) => (s, error.message)
       case Right(result) => (s.copy(context = result.context), renderEvaluationResult(result))
     }
