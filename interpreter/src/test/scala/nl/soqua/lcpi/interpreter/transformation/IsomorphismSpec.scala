@@ -9,7 +9,7 @@ import scala.language.postfixOps
 
 class IsomorphismSpec extends WordSpec with Matchers {
 
-  import DeBruijnIndex._
+  import DeBruijn._
 
   private implicit class Parse(val expr: String) extends Matchers {
     def is(o: Any): Assertion = o match {

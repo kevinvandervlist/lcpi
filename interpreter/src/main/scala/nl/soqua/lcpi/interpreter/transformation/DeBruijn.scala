@@ -5,7 +5,7 @@ import nl.soqua.lcpi.ast.lambda.{Application, Expression, LambdaAbstraction, Var
 import scala.language.implicitConversions
 import scala.util.Try
 
-object DeBruijnIndex {
+object DeBruijn {
 
   import AlphaReduction.α
   import Names.unused

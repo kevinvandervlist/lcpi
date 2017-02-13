@@ -3,7 +3,7 @@ package nl.soqua.lcpi.interpreter
 import nl.soqua.lcpi.ast.interpreter.ReplExpression
 import nl.soqua.lcpi.ast.interpreter.ReplExpression._
 import nl.soqua.lcpi.ast.lambda.{Expression, Variable}
-import nl.soqua.lcpi.interpreter.transformation.{DeBruijnIndex, Stringify}
+import nl.soqua.lcpi.interpreter.transformation.{DeBruijn, Stringify}
 import nl.soqua.lcpi.parser.repl.ReplParser
 import org.scalatest.Matchers
 
@@ -63,7 +63,7 @@ trait InterpreterTester {
              |expected: ${Stringify(expectedExpression)}
              |---
           """.stripMargin) {
-          DeBruijnIndex.index(actualExpression.expression) shouldBe DeBruijnIndex.index(expectedExpression)
+          DeBruijn.index(actualExpression.expression) shouldBe DeBruijn.index(expectedExpression)
         }
       })
     }
