@@ -15,7 +15,8 @@ class ReplCompilerSpec extends ReplMonadTester with WordSpecLike with Matchers {
     val compiler = new DiskIO() with ReplCompiler {
       override def readFile(path: String): Try[Stream[String]] = Try {
         List(
-          "FOO := x"
+          "FOO := x",
+          "x"
         ).toStream
       }
     }
@@ -85,6 +86,13 @@ class ReplCompilerSpec extends ReplMonadTester with WordSpecLike with Matchers {
     "reload a loaded file" in {
       implicit val state = emptyState.copy(reloadableFiles = emptyState.reloadableFiles :+ "bar")
       ReplMonad.reload() >> "Successfully reloaded file `bar`"
+    }
+    "reload a loaded file and update its definition if it has changed" in {
+      val cOld = CombinatorLibrary.loadIn(Context()).assign(Variable("FOO"), Variable("old"))
+      val cNew = CombinatorLibrary.loadIn(Context()).assign(Variable("FOO"), Variable("x"))
+      implicit val state = emptyState.copy(context = cOld, reloadableFiles = emptyState.reloadableFiles :+ "foo")
+      ReplMonad.reload() >> "Successfully reloaded file `foo`"
+      ReplMonad.reload() >> state.copy(context = cNew)
     }
     "fail to reload when no file is loaded yet" in {
       ReplMonad.reload() >> "Failed to reload: no file has been loaded yet"

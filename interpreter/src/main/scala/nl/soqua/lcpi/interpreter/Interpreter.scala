@@ -13,15 +13,26 @@ object Interpreter {
 
   private def existingVarError(v: Variable) = InterpreterError(s"The variable '${v.symbol}' has already been assigned in the context")
 
-  private def inputAsExpressionWithImmutableInput(ctx: Context, expression: ReplExpression): Either[InterpreterError, InterpreterResult] =
+  private def inputAsExpressionWithImmutableContext(ctx: Context, expression: ReplExpression): Either[InterpreterError, InterpreterResult] =
     expression match {
       case Assignment(v, _) if ctx.contains(v) => Left(existingVarError(v))
       case Assignment(v, expr) => Right(InterpreterResult(ctx.assign(v, expr), re2e(expr)))
       case nl.soqua.lcpi.ast.interpreter.Expression(expr) => Right(InterpreterResult(ctx, expr))
     }
 
+  private def inputAsExpressionWithMutableContext(ctx: Context, expression: ReplExpression): Either[InterpreterError, InterpreterResult] =
+    expression match {
+      case Assignment(v, expr) => Right(InterpreterResult(ctx.assign(v, expr), re2e(expr)))
+      case nl.soqua.lcpi.ast.interpreter.Expression(expr) => Right(InterpreterResult(ctx, expr))
+    }
+
+  def mutableApply(ctx: Context, expression: ReplExpression): Either[InterpreterError, InterpreterResult] = for {
+    expr <- inputAsExpressionWithMutableContext(ctx, expression)
+    i <- Interpreter(expr.context, expr.expression)
+  } yield i
+
   def apply(ctx: Context, expression: ReplExpression): Either[InterpreterError, InterpreterResult] = for {
-    expr <- inputAsExpressionWithImmutableInput(ctx, expression)
+    expr <- inputAsExpressionWithImmutableContext(ctx, expression)
     i <- Interpreter(expr.context, expr.expression)
   } yield i
 
@@ -45,7 +56,7 @@ object Interpreter {
   }
 
   def trace(ctx: Context, expression: ReplExpression): Either[InterpreterError, InterpreterResult] = for {
-    expr <- inputAsExpressionWithImmutableInput(ctx, expression)
+    expr <- inputAsExpressionWithImmutableContext(ctx, expression)
     i <- Interpreter.trace(expr.context, expr.expression)
   } yield i
 
