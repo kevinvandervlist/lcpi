@@ -14,6 +14,8 @@ Among others, the following features are supported:
 * Although not supported in pure λ-calculus, one can use the REPL to assign expressions to variables. These will be substituted before running the α-reduction.
 * A few well-known functions are added by default for convenience (e.g. I, Y, TRUE etc).
 * Additional files containing extra λs can be (re)loaded from within the REPL. See the loading and reloading demo.
+* You can `load` files from disk, and `reload` them if you changed them.
+* Any valid λ-expression can be rendered as [De Bruijn Index notation](https://en.wikipedia.org/wiki/De_Bruijn_index) via the `dbi` command.
 * Run `help` in the REPL for additional information.
 
 ## running the REPL:
