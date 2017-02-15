@@ -39,8 +39,9 @@ class ReplScenariosSpec extends ReplMonadTester with InterpreterTester with Word
       implicit val compiler = new DiskIO with ReplCompiler {
         override def readFile(path: String): Try[Stream[String]] = Try {
           path match {
-            case "foo.lcpi" => List("load bar.lcpi").toStream
+            case "foo.lcpi" => List("load bar.lcpi", "load quuk.lcpi").toStream
             case "bar.lcpi" => List("BAR := b", "aschu anth !]8]+{ # rubbish").toStream
+            case "quuk.lcpi" => List.empty.toStream
             case _ => List.empty.toStream
           }
         }
@@ -52,7 +53,7 @@ class ReplScenariosSpec extends ReplMonadTester with InterpreterTester with Word
 
       val c = CombinatorLibrary.loadIn(Context()).assign(Variable("BAR"), Variable("b"))
       p >> "b"
-      p >> emptyState.copy(context = c, reloadableFiles = List("bar.lcpi", "foo.lcpi"))
+      p >> emptyState.copy(context = c, reloadableFiles = List("bar.lcpi", "quuk.lcpi", "foo.lcpi"))
     }
     "loading files and then calling reset should yield a pristine state" in {
       implicit val compiler = new DiskIO with ReplCompiler {

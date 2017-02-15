@@ -28,15 +28,15 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
   private def renderContext(v: Variable, e: Expression): String =
     f"${Stringify(v)}%10s := ${Stringify(e)}%s"
 
-  private def streamCommands(stream: Stream[String]): Repl[_] = Try {
-    stream
-      .filterNot(l => l.startsWith("#")) // Skip 'comments'
-      .map(l => StdInParser(l))
-      .collect {
-        case Right(cmd) => cmd
-      }
-      .reduce((c1, c2) => c1.map(_ => c2))
-  }.getOrElse(ReplMonad.nothing())
+  private def streamCommands(stream: Stream[String]): Repl[_] = stream
+    .filterNot(l => l.startsWith("#")) // Skip 'comments'
+    .map(l => StdInParser(l))
+    .collect {
+      case Right(cmd) => cmd
+    }
+    .foldRight(ReplMonad.nothing())((v, acc) => v match {
+      case cmd => cmd.flatMap(_ => acc)
+    })
 
   override protected def help(): PureReplState[String] =
     State.pure(Messages.help)
