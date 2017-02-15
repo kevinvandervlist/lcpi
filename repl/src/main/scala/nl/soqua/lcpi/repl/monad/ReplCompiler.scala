@@ -12,7 +12,7 @@ import nl.soqua.lcpi.repl.monad.ReplMonad.Repl
 import nl.soqua.lcpi.repl.parser.StdInParser
 
 import scala.collection.mutable
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
 
@@ -25,19 +25,18 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
       builder.append(Stringify(resultExpression)).toString()
   }
 
-  private def renderContext(acc: mutable.StringBuilder, v: Variable, e: Expression): mutable.StringBuilder =
-    acc.append(f"${Stringify(v)}%10s := ${Stringify(e)}%s$lb%s")
+  private def renderContext(v: Variable, e: Expression): String =
+    f"${Stringify(v)}%10s := ${Stringify(e)}%s"
 
-  private def streamCommands(stream: Stream[String]): Repl[_] = stream
-    .filterNot(l => l.startsWith("#")) // Skip 'comments'
-    .map(l => StdInParser(l))
-    .map {
-      case Right(cmd) => cmd
-      case Left(_) => ReplMonad.nothing()
-    }
-    .foldRight(ReplMonad.nothing())((v, acc) => v match {
-      case cmd => cmd.flatMap(_ => acc)
-    })
+  private def streamCommands(stream: Stream[String]): Repl[_] = Try {
+    stream
+      .filterNot(l => l.startsWith("#")) // Skip 'comments'
+      .map(l => StdInParser(l))
+      .collect {
+        case Right(cmd) => cmd
+      }
+      .reduce((c1, c2) => c1.map(_ => c2))
+  }.getOrElse(ReplMonad.nothing())
 
   override protected def help(): PureReplState[String] =
     State.pure(Messages.help)
@@ -46,7 +45,7 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
     State.modify(s => s.copy(terminated = true))
 
   override protected def show(): PureReplState[String] =
-    State.inspect(s => s.context.foldLeft(mutable.StringBuilder.newBuilder)(renderContext).toString().dropRight(lb.length))
+    State.inspect(s => s.context.map(renderContext).mkString(lb))
 
   override protected def reset(): PureReplState[Unit] =
     State.modify(_ => ReplState.empty)
@@ -64,7 +63,7 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
       } else {
         streamCommands(stream).foldMap(compile).run(s).value match {
           case (newS, out: String) => (newS.copy(reloadableFiles = newS.reloadableFiles :+ file), s"${out}Successfully loaded file `$file`")
-          case (newS, out) => (newS.copy(reloadableFiles = newS.reloadableFiles :+ file), s"Successfully loaded file `$file`")
+          case (newS, _) => (newS.copy(reloadableFiles = newS.reloadableFiles :+ file), s"Successfully loaded file `$file`")
         }
       }
     })
@@ -81,7 +80,6 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
           case Success(stream) =>
             val program = streamCommands(stream)
             program.foldMap(compile).run(s).value match {
-              case (newS, msgs: String) => (newS.context, out ++ List(msgs, s"Successfully reloaded file `$file`"))
               case (newS, _) => (newS.context, out ++ List(s"Successfully reloaded file `$file`"))
             }
         }

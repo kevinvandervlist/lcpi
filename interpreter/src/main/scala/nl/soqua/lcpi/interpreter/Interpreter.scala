@@ -16,8 +16,7 @@ object Interpreter {
   private def inputAsExpressionWithImmutableContext(ctx: Context, expression: ReplExpression): Either[InterpreterError, InterpreterResult] =
     expression match {
       case Assignment(v, _) if ctx.contains(v) => Left(existingVarError(v))
-      case Assignment(v, expr) => Right(InterpreterResult(ctx.assign(v, expr), re2e(expr)))
-      case nl.soqua.lcpi.ast.interpreter.Expression(expr) => Right(InterpreterResult(ctx, expr))
+      case _ => inputAsExpressionWithMutableContext(ctx, expression)
     }
 
   private def inputAsExpressionWithMutableContext(ctx: Context, expression: ReplExpression): Either[InterpreterError, InterpreterResult] =

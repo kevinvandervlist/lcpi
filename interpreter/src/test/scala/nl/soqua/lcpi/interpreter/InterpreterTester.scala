@@ -36,6 +36,9 @@ trait InterpreterTester {
     }
 
     override def contains(v: Variable): Boolean = ctx.contains(v)
+
+    override def map[B](fn: (Variable, Expression) => B): List[B] =
+      ctx.map(fn)
   }
 
   /**

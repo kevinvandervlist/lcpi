@@ -7,6 +7,8 @@ trait Context {
 
   def foreach(fn: (Variable, Expression) => Unit): Unit
 
+  def map[B](fn: (Variable, Expression) => B): List[B]
+
   def assign(v: Variable, e: Expression): Context
 
   def contains(v: Variable): Boolean
@@ -18,6 +20,11 @@ object Context {
 
 private case class ContextImpl(values: Map[Variable, Expression]) extends Context {
 
+  private def sortedList: List[(Variable, Expression)] = values.toList
+    .sortWith((t1, t2) => {
+      t1._1.symbol < t2._1.symbol
+    })
+
   override def assign(v: Variable, e: Expression): Context = copy(values + (v -> e))
 
   override def contains(v: Variable): Boolean = values.contains(v)
@@ -25,7 +32,8 @@ private case class ContextImpl(values: Map[Variable, Expression]) extends Contex
   override def foreach(fn: (Variable, Expression) => Unit): Unit = values.foreach(t => fn(t._1, t._2))
 
   override def foldLeft[T](seed: T)(op: (T, Variable, Expression) => T): T =
-    values.toList.sortWith((t1, t2) => {
-      t1._1.symbol < t2._1.symbol
-    }).foldLeft(seed)((acc, t) => op(acc, t._1, t._2))
+    sortedList.foldLeft(seed)((acc, t) => op(acc, t._1, t._2))
+
+  override def map[B](fn: (Variable, Expression) => B): List[B] =
+    sortedList.map(t => fn(t._1, t._2))
 }

@@ -1,8 +1,8 @@
 package nl.soqua.lcpi.repl.monad
 
 import nl.soqua.lcpi.ast.interpreter.Assignment
+import nl.soqua.lcpi.ast.lambda.Expression.{V, λ}
 import nl.soqua.lcpi.ast.lambda.{Application, Variable}
-import nl.soqua.lcpi.ast.lambda.Expression.{λ, V}
 import nl.soqua.lcpi.interpreter.Context
 import nl.soqua.lcpi.repl.Messages
 import nl.soqua.lcpi.repl.lib.{CombinatorLibrary, DiskIO}
@@ -118,6 +118,18 @@ class ReplCompilerSpec extends ReplMonadTester with WordSpecLike with Matchers {
     "load a file, then fail to reload it again" in {
       implicit val state = emptyState.copy(reloadableFiles = emptyState.reloadableFiles :+ "foo")
       ReplMonad.reload() >> "Failed to reload `foo`: failed"
+    }
+  }
+  "An empty file" should {
+    implicit val compiler: ReplCompilerDefinition.alias = new DiskIO() with ReplCompiler {
+      override def readFile(path: String): Try[Stream[String]] = Try {
+        List.empty.toStream
+      }
+    }.compile
+    implicit val state: ReplState = emptyState
+    "not be a problem" in {
+      ReplMonad.load("baz") >> "Successfully loaded file `baz`"
+      ReplMonad.load("baz") >> emptyState.copy(reloadableFiles = "baz" :: emptyState.reloadableFiles)
     }
   }
 }
