@@ -3,12 +3,12 @@
 
 ### Bug Fixes
 
-* 
+* [dc5abb2](https://github.com/kevinvandervlist/lcpi/commit/dc5abb2ead2b34375ad5982aaffb1ceb313e84bf) Regression introduced by [d1314ae](https://github.com/kevinvandervlist/lcpi/commit/d1314aea5f53801071b45f697fcc9f0ef52be893): properly reduce repl commands. 
 
 ### Features
 
-* 
-
+* [#7](https://github.com/kevinvandervlist/lcpi/pull/7) Jline (GNU readline-esque) REPL support
+* [#8](https://github.com/kevinvandervlist/lcpi/pull/8) Minimize the number of parentheses used during stringification
 
 <a name="1.0.2"></a>
 # [1.0.2](https://github.com/kevinvandervlist/lcpi/compare/v1.0.1...v1.0.2) (2017-02-14)
@@ -23,7 +23,7 @@
 * [2c5aad9](https://github.com/kevinvandervlist/lcpi/commit/2c5aad93cdaeaaac018f1e0328e886ff4960d4ef) Sort REPL assignments alphabetically and indent them with 10 chars.
 * [7c59ffd](https://github.com/kevinvandervlist/lcpi/commit/7c59ffdb4eeb5374408d595b93f0eaef79c7eb0f) Reload all files instead of the last one.
 * [#3](https://github.com/kevinvandervlist/lcpi/pull/3) Transitively load additional files if `load` commands are encounterd while reading files.
-* [#6](https://github.com/kevinvandervlist/lcpi/pull/3) Add a command to render an expression in De Bruijn Index notation. 
+* [#6](https://github.com/kevinvandervlist/lcpi/pull/6) Add a command to render an expression in De Bruijn Index notation. 
 
 <a name="1.0.1"></a>
 # [1.0.1](https://github.com/kevinvandervlist/lcpi/compare/v1.0.0...v1.0.1) (2017-02-08)

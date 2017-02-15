@@ -16,6 +16,7 @@ object Stringify {
   // Mark the parent as nothing special
   private case object Nothing extends ExpressionType
 
+  // See commit 165ee2c79a91fa03d90a37e06804f4366f028942 for details on why the reverse is applied.
   def apply(e: Expression): String = display(Nothing, e)(StringBuilder.newBuilder).toString().reverse
 
   def display(parent: ExpressionType, e: Expression): StringBuilder => StringBuilder = (parent, e) match {
