@@ -16,9 +16,9 @@ object Stringify {
   // Mark the parent as nothing special
   private case object Nothing extends ExpressionType
 
-  def apply(e: Expression): String = display(Nothing, e)("")
+  def apply(e: Expression): String = display(Nothing, e)(StringBuilder.newBuilder).toString().reverse
 
-  private def display(parent: ExpressionType, e: Expression): String => String = (parent, e) match {
+  def display(parent: ExpressionType, e: Expression): StringBuilder => StringBuilder = (parent, e) match {
     case (Function, LambdaAbstraction(_, _)) => parenthesize(display(Nothing, e))
     case (_, LambdaAbstraction(x, a)) => lambda compose display(Nothing, x) compose dot compose display(Nothing, a)
     case (Function, Application(_: Variable, _: Variable)) => display(Nothing, e)
@@ -28,15 +28,14 @@ object Stringify {
     case (_, v: Variable) => show(v.symbol)
   }
 
-  private def show(s: String): String => String = (suffix: String) =>
-    s"$s$suffix"
+  @inline private def show(s: String): StringBuilder => StringBuilder = (b: StringBuilder) => b.append(s.reverse)
 
-  private def space = show(" ")
+  @inline private def space = show(" ")
 
-  private def lambda = show("λ")
+  @inline private def lambda = show("λ")
 
-  private def dot = show(".")
+  @inline private def dot = show(".")
 
-  private def parenthesize(f: String => String): String => String =
+  @inline private def parenthesize(f: StringBuilder => StringBuilder): StringBuilder => StringBuilder =
     show("(") compose f compose show(")")
 }
