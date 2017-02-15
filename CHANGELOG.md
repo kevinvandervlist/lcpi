@@ -1,5 +1,17 @@
+<a name="1.0.4"></a>
+# [1.0.4](https://github.com/kevinvandervlist/lcpi/compare/v1.0.2...v1.0.3) (????-??-??)
+
+### Bug Fixes
+
+*  
+
+### Features
+
+* 
+
+
 <a name="1.0.3"></a>
-# [1.0.3](https://github.com/kevinvandervlist/lcpi/compare/v1.0.2...v1.0.3) (????-??-??)
+# [1.0.3](https://github.com/kevinvandervlist/lcpi/compare/v1.0.2...v1.0.3) (2017-02-15)
 
 ### Bug Fixes
 
