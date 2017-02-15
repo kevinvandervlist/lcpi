@@ -13,7 +13,7 @@ object Messages {
   val help: String =
     s"""
       |Notation:
-      |* λ is either a λ or a \\. So both \\x.x and λx.x are allowed.
+      |* λ is either a λ or a \\\\. So both \\\\x.x and λx.x are allowed.
       |* You can assign variables; `I := λx.x` stores the identity function to the variable `I`.
       |  These have to be capitalized.
       |
