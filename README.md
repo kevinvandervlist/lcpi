@@ -7,7 +7,7 @@ This provides a parser and interpreter and REPL for the untyped lambda calculus.
 The REPL has tracing capabilities to show all intermediate reduction steps.
 Among others, the following features are supported:
 
-* Lambda is either a `λ` or a `\ `, so `\x.x` and `λx.x` are identical.
+* Lambda is either a `λ` or a `\\ `, so `\\x.x` and `λx.x` are identical.
 * There is a shorthand available for nesting, so `λx y z.x y z` is equal to `λx.λy.λz.x y z`.
 * The parser is fully left-associative, so `x y z` is `(x y) z`.
 * The REPL can toggle between a normal and a *tracing* mode, showing all intermediate reduction steps.

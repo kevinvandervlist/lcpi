@@ -57,7 +57,8 @@ lazy val repl = (project in file("repl")).
     libraryDependencies ++= Seq(
       "org.scala-lang.modules" %% "scala-parser-combinators" % sParSecVersion,
       "org.typelevel" %% "cats" % catsVersion,
-      "org.typelevel" %% "cats-free" % catsVersion
+      "org.typelevel" %% "cats-free" % catsVersion,
+      "org.jline" % "jline" % "3.1.2"
     ),
     mainClass in assembly := Some("nl.soqua.lcpi.repl.Main")
   ).dependsOn(ast, parser, interpreter % "test->test;compile->compile")
