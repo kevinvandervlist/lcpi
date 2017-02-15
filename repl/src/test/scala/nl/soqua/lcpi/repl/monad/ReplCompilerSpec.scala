@@ -60,8 +60,8 @@ class ReplCompilerSpec extends ReplMonadTester with WordSpecLike with Matchers {
       implicit val state = emptyState.copy(traceMode = Enabled)
       val e = Application(Variable("I"), Variable("x"))
       ReplMonad.expression(e) >> List(
-        "S => ((λx.x) x)",
-        "α => ((λx.x) x)",
+        "S => (λx.x) x",
+        "α => (λx.x) x",
         "β => x",
         "η => x",
         "x"
@@ -100,7 +100,7 @@ class ReplCompilerSpec extends ReplMonadTester with WordSpecLike with Matchers {
     }
     "render an expression in De Bruijn Index notation" in {
       val x = V("x")
-      ReplMonad.deBruijnIndex(λ(x, x)) >> "(λ.1)"
+      ReplMonad.deBruijnIndex(λ(x, x)) >> "λ.1"
     }
     "not be able to render a failure as de bruijn index" in {
       val x = V("x")

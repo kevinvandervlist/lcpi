@@ -1,5 +1,6 @@
 package nl.soqua.lcpi.interpreter.transformation
 
+import nl.soqua.lcpi.ast.lambda.Expression
 import nl.soqua.lcpi.ast.lambda.Expression.A
 import nl.soqua.lcpi.interpreter.transformation.Stringify._
 import nl.soqua.lcpi.parser.lambda.LambdaCalcParser
@@ -17,6 +18,17 @@ class IsomorphismSpec extends WordSpec with Matchers {
       case `deBruijn` => plainIsomorphism
     }
 
+    private def compareWithClue(expected: Expression, actual: Expression): Assertion = {
+      withClue(
+        s"""
+          |expected: ${Stringify(expected)}
+          |actual:   ${Stringify(actual)}
+          |
+        """.stripMargin) {
+        expected shouldBe actual
+      }
+    }
+
     def plainIsomorphism: Assertion = {
       val result = for {
         p1 <- LambdaCalcParser(expr)
@@ -24,7 +36,7 @@ class IsomorphismSpec extends WordSpec with Matchers {
       } yield (p1, p2)
       result match {
         case Left(ex) => fail(s"Expression $expr failed: $ex")
-        case Right((e1, e2)) => e1 shouldBe e2
+        case Right((e1, e2)) => compareWithClue(e1, e2)
       }
     }
 
@@ -35,7 +47,7 @@ class IsomorphismSpec extends WordSpec with Matchers {
       } yield (p1, p2)
       result match {
         case Left(ex) => fail(s"Expression $expr failed: $ex")
-        case Right((e1, e2)) => e1 shouldBe e2
+        case Right((e1, e2)) => compareWithClue(e1, e2)
       }
     }
   }
