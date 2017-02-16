@@ -3,7 +3,7 @@ javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint")
 // Cats and cats-free version
 val catsVersion = "0.9.0"
 // scala-parser-combinator version
-val sParSecVersion = "1.0.4"
+val sParSecVersion = "1.0.5"
 
 
 lazy val commonSettings = Seq(
@@ -16,7 +16,8 @@ lazy val commonSettings = Seq(
     "-feature",
     "-Xfatal-warnings",
     "-deprecation",
-    "-unchecked"
+    "-unchecked",
+    "-Ywarn-unused-import"
   ),
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"

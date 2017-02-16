@@ -2,7 +2,6 @@ package nl.soqua.lcpi.interpreter.transformation
 
 import nl.soqua.lcpi.ast.lambda.{Application, Expression, LambdaAbstraction, Variable}
 
-import scala.language.implicitConversions
 import scala.util.Try
 
 object DeBruijn {

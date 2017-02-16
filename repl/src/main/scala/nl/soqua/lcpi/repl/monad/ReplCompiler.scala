@@ -12,7 +12,7 @@ import nl.soqua.lcpi.repl.monad.ReplMonad.Repl
 import nl.soqua.lcpi.repl.parser.StdInParser
 
 import scala.collection.mutable
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
 

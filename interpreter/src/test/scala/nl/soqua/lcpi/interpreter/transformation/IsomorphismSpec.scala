@@ -1,12 +1,9 @@
 package nl.soqua.lcpi.interpreter.transformation
 
 import nl.soqua.lcpi.ast.lambda.Expression
-import nl.soqua.lcpi.ast.lambda.Expression.A
 import nl.soqua.lcpi.interpreter.transformation.Stringify._
 import nl.soqua.lcpi.parser.lambda.LambdaCalcParser
 import org.scalatest.{Assertion, Matchers, WordSpec}
-
-import scala.language.postfixOps
 
 class IsomorphismSpec extends WordSpec with Matchers {
 
