@@ -21,7 +21,7 @@ case class LoadFile(path: String) extends ReplMonadA[String]
 
 case object Reload extends ReplMonadA[String]
 
-case class Command(expression: ReplExpression) extends ReplMonadA[String]
+case class EvaluateReplExpression(expression: ReplExpression) extends ReplMonadA[String]
 
 case class DeBruijnIndex(expression: ReplExpression) extends ReplMonadA[String]
 
@@ -45,7 +45,7 @@ object ReplMonad {
 
   def reload(): Repl[String] = Free.liftF[ReplMonadA, String](Reload)
 
-  def expression(e: ReplExpression): Free[ReplMonadA, String] = Free.liftF[ReplMonadA, String](Command(e))
+  def evalExpression(e: ReplExpression): Free[ReplMonadA, String] = Free.liftF[ReplMonadA, String](EvaluateReplExpression(e))
 
   def deBruijnIndex(e: ReplExpression): Free[ReplMonadA, String] = Free.liftF[ReplMonadA, String](DeBruijnIndex(e))
 

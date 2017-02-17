@@ -54,12 +54,12 @@ class ReplCompilerSpec extends ReplMonadTester with WordSpecLike with Matchers {
     }
     "evaluate an expression in normal mode" in {
       val e = Application(Variable("I"), Variable("x"))
-      ReplMonad.expression(e) >> "x"
+      ReplMonad.evalExpression(e) >> "x"
     }
     "evaluate an expression in trace mode" in {
       implicit val state = emptyState.copy(traceMode = Enabled)
       val e = Application(Variable("I"), Variable("x"))
-      ReplMonad.expression(e) >> List(
+      ReplMonad.evalExpression(e) >> List(
         "S => (λx.x) x",
         "α => (λx.x) x",
         "β => x",
@@ -68,7 +68,7 @@ class ReplCompilerSpec extends ReplMonadTester with WordSpecLike with Matchers {
       ).mkString(System.lineSeparator())
     }
     "duplicate assignments should be rejected" in {
-      ReplMonad.expression(Assignment(Variable("I"), Variable("x"))) >> "The variable 'I' has already been assigned in the context"
+      ReplMonad.evalExpression(Assignment(Variable("I"), Variable("x"))) >> "The variable 'I' has already been assigned in the context"
     }
     "load a file" in {
       val c = CombinatorLibrary.loadIn(Context()).assign(Variable("FOO"), Variable("x"))

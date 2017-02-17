@@ -30,9 +30,9 @@ class ReplScenariosSpec extends ReplMonadTester with InterpreterTester with Word
 
       for {
         _ <- ReplMonad.help()
-        _ <- ReplMonad.expression(funcs.head)
-        _ <- ReplMonad.expression(funcs(1))
-        program <- ReplMonad.expression(funcs(2))
+        _ <- ReplMonad.evalExpression(funcs.head)
+        _ <- ReplMonad.evalExpression(funcs(1))
+        program <- ReplMonad.evalExpression(funcs(2))
       } yield program >> "y"
     }
     "load files transitively" in {
@@ -48,7 +48,7 @@ class ReplScenariosSpec extends ReplMonadTester with InterpreterTester with Word
       }.compile
       val p = for {
         _ <- ReplMonad.load("foo.lcpi")
-        program <- ReplMonad.expression(Variable("BAR"))
+        program <- ReplMonad.evalExpression(Variable("BAR"))
       } yield program
 
       val c = CombinatorLibrary.loadIn(Context()).assign(Variable("BAR"), Variable("b"))

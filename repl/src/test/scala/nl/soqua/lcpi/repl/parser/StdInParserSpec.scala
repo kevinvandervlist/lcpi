@@ -21,7 +21,7 @@ class StdInParserSpec extends StdInParserTester with WordSpecLike with Matchers 
       }
     }
     "parse an expression" in {
-      "λx.x" >> ReplMonad.expression(LambdaAbstraction(Variable("x"), Variable("x")))
+      "λx.x" >> ReplMonad.evalExpression(LambdaAbstraction(Variable("x"), Variable("x")))
     }
     "don't parse anything that is not a valid λ expression" in {
       assertThrows[TestFailedException] {

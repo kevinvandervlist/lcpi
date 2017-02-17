@@ -56,7 +56,7 @@ trait StdInParserRules extends RegexParsers with PackratParsers {
   lazy val command: P[Repl[_]] = {
     ".*".r >> (v => ReplParser(v) match {
       case Left(e) => failure(e.message)
-      case Right(e) => success(ReplMonad.expression(e))
+      case Right(e) => success(ReplMonad.evalExpression(e))
     })
   }
 }

@@ -99,7 +99,7 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
     }
   }
 
-  override protected def command(expression: ReplExpression): PureReplState[String] = State(s => {
+  override protected def replExpression(expression: ReplExpression): PureReplState[String] = State(s => {
     interpreterFunction(s)(s.context, expression) match {
       case Left(error) => (s, error.message)
       case Right(result) => (s.copy(context = result.context), renderEvaluationResult(result))
