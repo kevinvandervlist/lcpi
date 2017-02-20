@@ -4,6 +4,7 @@ import nl.soqua.lcpi.ast.interpreter.ReplExpression._
 import nl.soqua.lcpi.ast.interpreter.{Assignment, ReplExpression}
 import nl.soqua.lcpi.ast.lambda.{Expression, Variable}
 
+import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
@@ -37,19 +38,15 @@ object Interpreter {
 
   def apply(ctx: Context, term: Expression): Either[InterpreterError, InterpreterResult] = {
     // First retrieve any variables that are stored in the context
-    var changing = true
-    var substituted = term
-    do {
-      val x = ctx.foldLeft(substituted)((t, v, f) => substitute(t, v, f))
-      if (x == substituted) {
-        changing = false
-      } else {
-        substituted = x
+    @tailrec def substituteContext(in: Expression): Expression = {
+      ctx.foldLeft(in)((t, v, f) => substitute(t, v, f)) match {
+        case result if result == in => result
+        case result => substituteContext(result)
       }
-    } while (changing)
+    }
 
     // Then normalize them
-    val normalized = List(α _, β _, η _).foldLeft(substituted)((t, f) => f(t))
+    val normalized = List(α _, β _, η _).foldLeft(substituteContext(term))((t, f) => f(t))
 
     Right(InterpreterResult(ctx, normalized))
   }
@@ -75,24 +72,19 @@ object Interpreter {
   }
 
   private def substituteFromContextDeclarations(ctx: Context, term: Expression): (mutable.ListBuffer[(String, Expression)], Expression) = {
-    var out: mutable.ListBuffer[(String, Expression)] = ListBuffer.empty
+    val out: mutable.ListBuffer[(String, Expression)] = ListBuffer.empty
 
-    var changing = true
-    var expression = term
-    do {
-      val initial = expression
-      ctx.foreach((v, e) => {
-        expression = substitute(expression, v, e)
-        val entry = ("S", expression)
-        if (!out.contains(entry)) {
-          out += entry
+    def substituteContext(in: Expression): List[(String, Expression)] = {
+      @tailrec def f(in: Expression, res: List[(String, Expression)]): List[(String, Expression)] = {
+        ctx.foldLeft(in)((t, v, f) => substitute(t, v, f)) match {
+          case result if result == in => List("S" -> result)
+          case result => f(result, ("S" -> result) :: res)
         }
-      })
-      if (initial == expression) {
-        changing = false
       }
-    } while (changing)
+      f(in, List.empty)
+    }
 
-    (out, expression)
+    val trace = "S" -> term :: substituteContext(term)
+    out ++ trace -> trace.last._2
   }
 }

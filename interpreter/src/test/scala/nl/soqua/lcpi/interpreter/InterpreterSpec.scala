@@ -25,10 +25,12 @@ class InterpreterSpec extends InterpreterTester with WordSpecLike with Matchers 
     "Yield a list of intermediate steps" in {
       implicit val ctx: MutableContext = Context()
       val _a = V("a")
+      val I = V("I")
       "I := λx.x" >> "λx.x"
       Interpreter.trace(ctx, "(I λx.x) z") match {
         case Left(e) => fail(e.message)
         case Right(TraceInterpreterResult(_, _, trace)) => trace shouldBe List(
+          "S" -> A(A(I, λ(x, x)), z),
           "S" -> A(A(λ(x, x), λ(x, x)), z),
           "α" -> A(A(λ(x, x), λ(_a, _a)), z),
           "β" -> A(λ(_a, _a), z),
