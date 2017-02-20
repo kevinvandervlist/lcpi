@@ -48,7 +48,7 @@ object DeBruijn {
   private val empty = Variable("")
 
   private def index(e: Expression, level: Int, vars: Map[Variable, Int]): Expression = e match {
-    case v: Variable => vars .get(v)
+    case v: Variable => vars.get(v)
       .map(x => level - x)
       .map(x => Variable(x.toString))
       // It should always get a value, not finding one should be _impossible_, so crash if we don't have one

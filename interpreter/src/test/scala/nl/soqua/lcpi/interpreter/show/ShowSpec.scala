@@ -24,5 +24,9 @@ class ShowSpec extends WordSpec with Matchers {
       val parenized: String = string("_") compose g
       parenized shouldBe "_(az)"
     }
+    "implicitly convert a string to a show" in {
+      val f: String = string("a") compose "b"
+      f shouldBe "ab"
+    }
   }
 }

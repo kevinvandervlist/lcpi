@@ -11,7 +11,9 @@ object Show {
 
   implicit def sb2s(sb: StringBuilder): String = sb.toString()
 
-  implicit def showS2s(f: ShowS): String = f(StringBuilder.newBuilder).toString().reverse
+  implicit def showS2string(f: ShowS): String = f(StringBuilder.newBuilder).toString().reverse
+
+  implicit def str2s(s: String): ShowS = string(s)
 
   def empty: ShowS = identity
 

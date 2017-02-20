@@ -11,7 +11,7 @@ case object Help extends ReplMonadA[String]
 
 case object Quit extends ReplMonadA[Unit]
 
-case object Show extends ReplMonadA[String]
+case object ShowContext extends ReplMonadA[String]
 
 case object Reset extends ReplMonadA[Unit]
 
@@ -35,7 +35,7 @@ object ReplMonad {
 
   def quit(): Repl[Unit] = Free.liftF[ReplMonadA, Unit](Quit)
 
-  def show(): Repl[String] = Free.liftF[ReplMonadA, String](Show)
+  def showContext(): Repl[String] = Free.liftF[ReplMonadA, String](ShowContext)
 
   def reset(): Repl[Unit] = Free.liftF[ReplMonadA, Unit](Reset)
 

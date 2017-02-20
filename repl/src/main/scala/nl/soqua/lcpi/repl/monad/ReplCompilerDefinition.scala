@@ -22,7 +22,7 @@ trait ReplCompilerDefinition {
       case Help => help()
       case Quit => quit()
       case Reset => reset()
-      case Show => show()
+      case ShowContext => show()
       case TraceMode => trace()
       case EvaluateReplExpression(e) => replExpression(e)
       case LoadFile(file) => load(file)

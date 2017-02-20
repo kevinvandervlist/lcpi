@@ -27,7 +27,7 @@ trait StdInParserRules extends RegexParsers with PackratParsers {
   }
 
   lazy val show: P[Repl[_]] = {
-    "show".r ^^ (_ => ReplMonad.show())
+    "show".r ^^ (_ => ReplMonad.showContext())
   }
 
   lazy val reset: P[Repl[_]] = {

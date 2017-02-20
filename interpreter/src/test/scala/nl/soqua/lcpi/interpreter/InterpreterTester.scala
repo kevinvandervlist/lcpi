@@ -24,11 +24,6 @@ trait InterpreterTester {
     * @param ctx
     */
   protected implicit class MutableContext(private var ctx: Context) extends Context {
-    override def foldLeft[T](seed: T)(op: (T, Variable, Expression) => T): T =
-      ctx.foldLeft(seed)(op)
-
-    override def foreach(fn: (Variable, Expression) => Unit): Unit =
-      ctx.foreach(fn)
 
     override def assign(v: Variable, e: Expression): Context = {
       ctx = ctx.assign(v, e)
@@ -37,8 +32,8 @@ trait InterpreterTester {
 
     override def contains(v: Variable): Boolean = ctx.contains(v)
 
-    override def map[B](fn: (Variable, Expression) => B): List[B] =
-      ctx.map(fn)
+    override protected def expressions: List[(Variable, Expression)] =
+      ctx.map((v, e) => v -> e)
   }
 
   /**

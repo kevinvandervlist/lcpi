@@ -45,7 +45,7 @@ class ReplCompilerSpec extends ReplMonadTester with WordSpecLike with Matchers {
         .assign(Variable("FOO"), Variable("y"))
         .assign(Variable("BAR"), Variable("z"))
       implicit val state = emptyState.copy(context = c)
-      ReplMonad.show() >> s"       BAR := z${System.lineSeparator()}       FOO := y"
+      ReplMonad.showContext() >> s"       BAR := z${System.lineSeparator()}       FOO := y"
     }
     "reset the environment" in {
       val c = Context().assign(Variable("FOO"), Variable("y"))
@@ -60,6 +60,7 @@ class ReplCompilerSpec extends ReplMonadTester with WordSpecLike with Matchers {
       implicit val state = emptyState.copy(traceMode = Enabled)
       val e = Application(Variable("I"), Variable("x"))
       ReplMonad.evalExpression(e) >> List(
+        "S => I x",
         "S => (λx.x) x",
         "α => (λx.x) x",
         "β => x",
