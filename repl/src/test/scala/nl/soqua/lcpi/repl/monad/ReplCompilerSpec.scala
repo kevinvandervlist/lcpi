@@ -40,6 +40,31 @@ class ReplCompilerSpec extends ReplMonadTester with WordSpecLike with Matchers {
       ReplMonad.trace() >> emptyState.copy(traceMode = Disabled)
       ReplMonad.trace() >> Messages.traceModeDisabled
     }
+    "toggle ascii mode on" in {
+      ReplMonad.ascii() >> emptyState.copy(asciiMode = Enabled)
+      ReplMonad.ascii() >> Messages.asciiModeEnabled
+    }
+    "toggle ascii mode off" in {
+      implicit val state: ReplState = emptyState.copy(asciiMode = Enabled)
+      ReplMonad.ascii() >> emptyState.copy(asciiMode = Disabled)
+      ReplMonad.ascii() >> Messages.asciiModeDisabled
+    }
+    "render lambda's as `\\\\` when ascii mode is enabled" in {
+      implicit val state: ReplState = emptyState.copy(asciiMode = Enabled)
+      val x = V("x")
+      ReplMonad.deBruijnIndex(λ(x, x)) >> "\\\\.1"
+    }
+    "render lambda's as `\\\\` when ascii and trace mode is enabled" in {
+      implicit val state: ReplState = emptyState.copy(asciiMode = Enabled, traceMode = Enabled)
+      val x = V("x")
+      ReplMonad.evalExpression(λ(x, x)) >> List(
+        "S => \\\\x.x",
+        "S => \\\\x.x",
+        "α => \\\\x.x",
+        "η => \\\\x.x",
+        "\\\\x.x"
+      ).mkString(System.lineSeparator())
+    }
     "show the current environment if asked for" in {
       val c = Context()
         .assign(Variable("FOO"), Variable("y"))

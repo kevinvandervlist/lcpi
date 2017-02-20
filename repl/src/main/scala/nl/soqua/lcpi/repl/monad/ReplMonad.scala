@@ -17,6 +17,8 @@ case object Reset extends ReplMonadA[Unit]
 
 case object TraceMode extends ReplMonadA[String]
 
+case object AsciiMode extends ReplMonadA[String]
+
 case class LoadFile(path: String) extends ReplMonadA[String]
 
 case object Reload extends ReplMonadA[String]
@@ -40,6 +42,8 @@ object ReplMonad {
   def reset(): Repl[Unit] = Free.liftF[ReplMonadA, Unit](Reset)
 
   def trace(): Repl[String] = Free.liftF[ReplMonadA, String](TraceMode)
+
+  def ascii(): Repl[String] = Free.liftF[ReplMonadA, String](AsciiMode)
 
   def load(path: String): Repl[String] = Free.liftF[ReplMonadA, String](LoadFile(path))
 

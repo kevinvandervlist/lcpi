@@ -9,8 +9,6 @@ sealed trait Show
 object Show {
   type ShowS = StringBuilder => StringBuilder
 
-  implicit def sb2s(sb: StringBuilder): String = sb.toString()
-
   implicit def showS2string(f: ShowS): String = f(StringBuilder.newBuilder).toString().reverse
 
   implicit def str2s(s: String): ShowS = string(s)

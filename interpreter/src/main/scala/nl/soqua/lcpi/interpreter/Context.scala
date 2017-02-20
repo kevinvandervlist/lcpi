@@ -12,9 +12,6 @@ trait Context {
   def foldLeft[T](seed: T)(op: (T, Variable, Expression) => T): T =
     expressions.foldLeft(seed)((acc, t) => op(acc, t._1, t._2))
 
-  def foreach(fn: (Variable, Expression) => Unit): Unit =
-    expressions.foreach(t => fn(t._1, t._2))
-
   def map[B](fn: (Variable, Expression) => B): List[B] =
     expressions.map(t => fn(t._1, t._2))
 }

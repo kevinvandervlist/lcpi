@@ -14,6 +14,7 @@ class StdInParserSpec extends StdInParserTester with WordSpecLike with Matchers 
         "show" -> ReplMonad.showContext(),
         "reset" -> ReplMonad.reset(),
         "trace" -> ReplMonad.trace(),
+        "ascii" -> ReplMonad.ascii(),
         "load appel.csv" -> ReplMonad.load("appel.csv"),
         "reload" -> ReplMonad.reload()
       ) foreach {

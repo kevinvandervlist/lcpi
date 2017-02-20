@@ -24,6 +24,7 @@ trait ReplCompilerDefinition {
       case Reset => reset()
       case ShowContext => show()
       case TraceMode => trace()
+      case AsciiMode => ascii()
       case EvaluateReplExpression(e) => replExpression(e)
       case LoadFile(file) => load(file)
       case Reload => reload()
@@ -42,6 +43,8 @@ trait ReplCompilerDefinition {
   protected def reset(): PureReplState[Unit]
 
   protected def trace(): PureReplState[String]
+
+  protected def ascii(): PureReplState[String]
 
   protected def load(file: String): PureReplState[String]
 

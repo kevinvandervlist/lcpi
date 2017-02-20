@@ -24,10 +24,14 @@ object Messages {
       |* `load <name>` => load a file based on the relative path ($relativePath). Lines starting with `#` are ignored.
       |* `reload` => reload all files, overwriting any existing variables in the context if they already exist.
       |* `trace` => toggle trace mode.
+      |* `ascii` => toggle ascii mode in case your terminal can't render the lambda character λ.
       |* `reset` => reset the current REPL context.
       |* `<λ-expression>` => evaluate a λ-expression.
       |* `dbi <λ-expression>` => evaluate a λ-expression and render the result in De Bruijn Index notation.
     """.stripMargin
   val traceModeEnabled: String = "Trace mode is now on."
   val traceModeDisabled: String = "Trace mode is now off."
+
+  val asciiModeEnabled: String = "Ascii mode is now on. Lambdas will be rendered as `\\\\`"
+  val asciiModeDisabled: String = "Ascii mode is now off. Lambdas will be rendered as `λ`"
 }

@@ -18,11 +18,20 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
 
   private val lb: String = System.lineSeparator()
 
-  private def renderEvaluationResult(interpreterResult: InterpreterResult): String = interpreterResult match {
-    case SingleExpressionInterpreterResult(_, resultExpression) => Stringify(resultExpression)
-    case TraceInterpreterResult(_, resultExpression, trace) =>
-      val builder = trace.foldLeft(mutable.StringBuilder.newBuilder)((acc, t) => acc.append(s"${t._1} => ${Stringify(t._2)}$lb"))
-      builder.append(Stringify(resultExpression)).toString()
+  private def mightReplaceLambda(toggle: AsciiModeToggle): String => String = toggle match {
+    case Disabled => identity
+    case Enabled => (s) => s.replaceAll("λ", "\\\\\\\\")
+  }
+
+  private def renderEvaluationResult(asciiModeToggle: AsciiModeToggle, interpreterResult: InterpreterResult): String = {
+    val lambda = mightReplaceLambda(asciiModeToggle)
+    val str = interpreterResult match {
+      case SingleExpressionInterpreterResult(_, resultExpression) => Stringify(resultExpression)
+      case TraceInterpreterResult(_, resultExpression, trace) =>
+        val builder = trace.foldLeft(mutable.StringBuilder.newBuilder)((acc, t) => acc.append(s"${t._1} => ${Stringify(t._2)}$lb"))
+        builder.append(Stringify(resultExpression)).toString()
+    }
+    lambda(str)
   }
 
   private def renderContext(v: Variable, e: Expression): String =
@@ -45,7 +54,10 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
     State.modify(s => s.copy(terminated = true))
 
   override protected def show(): PureReplState[String] =
-    State.inspect(s => s.context.map(renderContext).mkString(lb))
+    State.inspect(s => {
+      val f = mightReplaceLambda(s.asciiMode)
+      f(s.context.map(renderContext).mkString(lb))
+    })
 
   override protected def reset(): PureReplState[Unit] =
     State.modify(_ => ReplState.empty)
@@ -55,6 +67,11 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
     case Disabled => (s.copy(traceMode = Enabled), Messages.traceModeEnabled)
   })
 
+  override protected def ascii(): PureReplState[String] = State(s => s.asciiMode match {
+    case Enabled => (s.copy(asciiMode = Disabled), Messages.asciiModeDisabled)
+    case Disabled => (s.copy(asciiMode = Enabled), Messages.asciiModeEnabled)
+  })
+
   override protected def load(file: String): PureReplState[String] = readFile(file) match {
     case Failure(ex) => State.pure(s"Failed to load `$file`: ${ex.getMessage}")
     case Success(stream) => State(s => {
@@ -62,7 +79,6 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
         (s, s"File `$file` is already loaded.")
       } else {
         streamCommands(stream).foldMap(compile).run(s).value match {
-          case (newS, out: String) => (newS.copy(reloadableFiles = newS.reloadableFiles :+ file), s"${out}Successfully loaded file `$file`")
           case (newS, _) => (newS.copy(reloadableFiles = newS.reloadableFiles :+ file), s"Successfully loaded file `$file`")
         }
       }
@@ -102,14 +118,14 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
   override protected def replExpression(expression: ReplExpression): PureReplState[String] = State(s => {
     interpreterFunction(s)(s.context, expression) match {
       case Left(error) => (s, error.message)
-      case Right(result) => (s.copy(context = result.context), renderEvaluationResult(result))
+      case Right(result) => (s.copy(context = result.context), renderEvaluationResult(s.asciiMode, result))
     }
   })
 
   override protected def deBruijnIndex(expression: ReplExpression): PureReplState[String] = State(s => {
     interpreterFunction(s)(s.context, expression) match {
       case Left(error) => (s, error.message)
-      case Right(result) => (s, Stringify(DeBruijn.index(result.expression)))
+      case Right(result) => (s, renderEvaluationResult(s.asciiMode, result.map(DeBruijn.index)))
     }
   })
 }
