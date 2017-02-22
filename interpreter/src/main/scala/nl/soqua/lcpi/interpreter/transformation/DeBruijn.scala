@@ -6,7 +6,6 @@ import scala.util.Try
 
 object DeBruijn {
 
-  import AlphaReduction.α
   import Names.unused
   import Variables.free
 
@@ -19,8 +18,8 @@ object DeBruijn {
 
   def index(e: Expression): Expression = {
     // First make sure that every free variable is given a unique integer value signaling its depth
-    val freeMap = free(α(e)).foldLeft(Map.empty[Variable, Int])({
-      case (m, v) if m.contains(v) => m
+    val freeMap = free(e).foldLeft(Map.empty[Variable, Int])({
+      case (m, v) if m contains v => m
       case (m, v) => m + (v -> (m.size + 1))
     })
     index(e, freeMap.size + 1, freeMap)
@@ -33,16 +32,16 @@ object DeBruijn {
   }.getOrElse(Integer.MAX_VALUE)
 
   private def reify(e: Expression, level: Int, vars: Map[Int, Variable]): (Expression, Map[Int, Variable]) = e match {
-    case v: Variable if vars.contains(level - asInt(v)) => (vars(level - asInt(v)), vars)
+    case v: Variable if vars.contains(level - asInt(v)) => vars(level - asInt(v)) -> vars
     case _: Variable => (unused(vars.values.toList), vars)
     case Application(s, t) =>
       val (s1, vars1) = reify(s, level, vars)
       val (s2, vars2) = reify(t, level, vars1)
-      (Application(s1, s2), vars2)
+      Application(s1, s2) -> vars2
     case LambdaAbstraction(_, t) =>
       val v = unused(vars.values.toList)
       val (t1, vars1) = reify(t, level + 1, vars + (level -> v))
-      (LambdaAbstraction(v, t1), vars1)
+      LambdaAbstraction(v, t1) -> vars1
   }
 
   private val empty = Variable("")
