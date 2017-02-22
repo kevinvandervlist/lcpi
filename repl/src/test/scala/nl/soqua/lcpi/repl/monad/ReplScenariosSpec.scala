@@ -2,7 +2,7 @@ package nl.soqua.lcpi.repl.monad
 
 import nl.soqua.lcpi.ast.lambda.Variable
 import nl.soqua.lcpi.interpreter.{Context, InterpreterTester}
-import nl.soqua.lcpi.repl.lib.{CombinatorLibrary, DiskIO}
+import nl.soqua.lcpi.repl.lib.{CombinatorLibrary, DiskIO, ReplState}
 import org.scalatest.{Matchers, WordSpecLike}
 
 import scala.language.postfixOps

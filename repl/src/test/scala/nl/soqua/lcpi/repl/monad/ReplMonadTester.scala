@@ -1,6 +1,6 @@
 package nl.soqua.lcpi.repl.monad
 
-import nl.soqua.lcpi.repl.lib.DiskIO
+import nl.soqua.lcpi.repl.lib.{DiskIO, ReplState}
 import nl.soqua.lcpi.repl.monad.ReplMonad.Repl
 import org.scalatest.Matchers
 

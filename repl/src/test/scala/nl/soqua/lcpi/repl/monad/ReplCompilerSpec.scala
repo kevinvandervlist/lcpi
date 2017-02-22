@@ -5,7 +5,7 @@ import nl.soqua.lcpi.ast.lambda.Expression.{V, λ}
 import nl.soqua.lcpi.ast.lambda.{Application, Variable}
 import nl.soqua.lcpi.interpreter.Context
 import nl.soqua.lcpi.repl.Messages
-import nl.soqua.lcpi.repl.lib.{CombinatorLibrary, DiskIO}
+import nl.soqua.lcpi.repl.lib._
 import org.scalatest.{Matchers, WordSpecLike}
 
 import scala.util.Try

@@ -3,6 +3,7 @@ package nl.soqua.lcpi.repl.monad
 import cats.data.State
 import cats.~>
 import nl.soqua.lcpi.ast.interpreter.ReplExpression
+import nl.soqua.lcpi.repl.lib.ReplState
 import nl.soqua.lcpi.repl.monad.ReplCompilerDefinition.{PureReplState, alias}
 
 object ReplCompilerDefinition {

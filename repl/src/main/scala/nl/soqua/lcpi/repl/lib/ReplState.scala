@@ -1,15 +1,14 @@
-package nl.soqua.lcpi.repl.monad
+package nl.soqua.lcpi.repl.lib
 
 import nl.soqua.lcpi.interpreter.Context
-import nl.soqua.lcpi.repl.lib.CombinatorLibrary
 
-private[monad] sealed trait TraceModePosition
+sealed trait TraceModePosition
 
-private[monad] sealed trait AsciiModeToggle
+sealed trait AsciiModeToggle
 
-private[monad] case object Enabled extends TraceModePosition with AsciiModeToggle
+case object Enabled extends TraceModePosition with AsciiModeToggle
 
-private[monad] case object Disabled extends TraceModePosition with AsciiModeToggle
+case object Disabled extends TraceModePosition with AsciiModeToggle
 
 object ReplState {
   val empty: ReplState = ReplState(CombinatorLibrary.loadIn(Context()), traceMode = Disabled, asciiMode = Disabled,

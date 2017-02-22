@@ -6,46 +6,14 @@ import nl.soqua.lcpi.ast.lambda.{Expression, Variable}
 import nl.soqua.lcpi.interpreter._
 import nl.soqua.lcpi.interpreter.transformation.{DeBruijn, Stringify}
 import nl.soqua.lcpi.repl.Messages
-import nl.soqua.lcpi.repl.lib.DiskIO
+import nl.soqua.lcpi.repl.lib._
 import nl.soqua.lcpi.repl.monad.ReplCompilerDefinition.PureReplState
 import nl.soqua.lcpi.repl.monad.ReplMonad.Repl
 import nl.soqua.lcpi.repl.parser.StdInParser
 
-import scala.collection.mutable
 import scala.util.{Failure, Success}
 
-trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
-
-  private val lb: String = System.lineSeparator()
-
-  private def mightReplaceLambda(toggle: AsciiModeToggle): String => String = toggle match {
-    case Disabled => identity
-    case Enabled => (s) => s.replaceAll("λ", "\\\\\\\\")
-  }
-
-  private def renderEvaluationResult(asciiModeToggle: AsciiModeToggle, interpreterResult: InterpreterResult): String = {
-    val lambda = mightReplaceLambda(asciiModeToggle)
-    val str = interpreterResult match {
-      case SingleExpressionInterpreterResult(_, resultExpression) => Stringify(resultExpression)
-      case TraceInterpreterResult(_, resultExpression, trace) =>
-        val builder = trace.foldLeft(mutable.StringBuilder.newBuilder)((acc, t) => acc.append(s"${t._1} => ${Stringify(t._2)}$lb"))
-        builder.append(Stringify(resultExpression)).toString()
-    }
-    lambda(str)
-  }
-
-  private def renderContext(v: Variable, e: Expression): String =
-    f"${Stringify(v)}%10s := ${Stringify(e)}%s"
-
-  private def streamCommands(stream: Stream[String]): Repl[_] = stream
-    .filterNot(l => l.startsWith("#")) // Skip 'comments'
-    .map(l => StdInParser(l))
-    .collect {
-      case Right(cmd) => cmd
-    }
-    .foldRight(ReplMonad.nothing())((v, acc) => v match {
-      case cmd => cmd.flatMap(_ => acc)
-    })
+trait ReplCompiler extends ReplCompilerDefinition with DiskIO with ExpressionRenderer {
 
   override protected def help(): PureReplState[String] =
     State.pure(Messages.help)
@@ -54,10 +22,7 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
     State.modify(s => s.copy(terminated = true))
 
   override protected def show(): PureReplState[String] =
-    State.inspect(s => {
-      val f = mightReplaceLambda(s.asciiMode)
-      f(s.context.map(renderContext).mkString(lb))
-    })
+    State.inspect(s => mightReplaceLambda(s.asciiMode)(s.context.map(renderContext).mkString(lb)))
 
   override protected def reset(): PureReplState[Unit] =
     State.modify(_ => ReplState.empty)
@@ -104,28 +69,37 @@ trait ReplCompiler extends ReplCompilerDefinition with DiskIO {
     }
   })
 
-  private def interpreterFunction(s: ReplState): (Context, ReplExpression) => Either[InterpreterError, InterpreterResult] = {
-    if (s.contextIsMutable) {
-      Interpreter.mutableApply
-    } else {
-      s.traceMode match {
-        case Disabled => Interpreter.apply
-        case Enabled => Interpreter.trace
-      }
-    }
-  }
-
   override protected def replExpression(expression: ReplExpression): PureReplState[String] = State(s => {
     interpreterFunction(s)(s.context, expression) match {
       case Left(error) => (s, error.message)
-      case Right(result) => (s.copy(context = result.context), renderEvaluationResult(s.asciiMode, result))
+      case Right(result) => (s.copy(context = result.context), renderEvaluationResult(s.asciiMode)(result))
     }
   })
 
   override protected def deBruijnIndex(expression: ReplExpression): PureReplState[String] = State(s => {
     interpreterFunction(s)(s.context, expression) match {
       case Left(error) => (s, error.message)
-      case Right(result) => (s, renderEvaluationResult(s.asciiMode, result.map(DeBruijn.index)))
+      case Right(result) => (s, renderEvaluationResult(s.asciiMode)(result.map(DeBruijn.index)))
     }
   })
+
+  private def renderContext(v: Variable, e: Expression): String =
+    f"${Stringify(v)}%10s := ${Stringify(e)}%s"
+
+  private def streamCommands(stream: Stream[String]): Repl[_] = stream
+    .filterNot(l => l.startsWith("#")) // Skip 'comments'
+    .map(l => StdInParser(l))
+    .collect {
+      case Right(cmd) => cmd
+    }
+    .foldRight(ReplMonad.nothing())((v, acc) => v match {
+      case cmd => cmd.flatMap(_ => acc)
+    })
+
+  private def interpreterFunction(s: ReplState): (Context, ReplExpression) => Either[InterpreterError, InterpreterResult] =
+    s.traceMode match {
+      case _ if s.contextIsMutable => Interpreter.mutableApply
+      case Disabled => Interpreter.apply
+      case Enabled => Interpreter.trace
+    }
 }

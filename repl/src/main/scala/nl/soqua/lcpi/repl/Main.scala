@@ -3,8 +3,8 @@ package nl.soqua.lcpi.repl
 import java.io.File
 
 import nl.soqua.lcpi.interpreter.Context
-import nl.soqua.lcpi.repl.lib.{CombinatorLibrary, DiskIO}
-import nl.soqua.lcpi.repl.monad.{ReplCompiler, ReplState}
+import nl.soqua.lcpi.repl.lib.{CombinatorLibrary, DiskIO, ReplState}
+import nl.soqua.lcpi.repl.monad.ReplCompiler
 import nl.soqua.lcpi.repl.parser.StdInParser
 import org.jline.reader.LineReaderBuilder
 import org.jline.terminal.TerminalBuilder
