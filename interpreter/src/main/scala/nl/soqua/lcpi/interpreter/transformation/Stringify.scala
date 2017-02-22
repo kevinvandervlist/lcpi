@@ -22,7 +22,7 @@ object Stringify {
 
   def apply(e: Expression): String = display(Nothing, e)
 
-  def display(parent: ExpressionType, e: Expression): StringBuilder => StringBuilder = (parent, e) match {
+  def display(parent: ExpressionType, e: Expression): ShowS = (parent, e) match {
     case (Function, LambdaAbstraction(_, _)) => parenthesize(display(Nothing, e))
     case (_, LambdaAbstraction(x, a)) => char('λ') compose display(Nothing, x) compose char('.') compose display(Nothing, a)
     case (Function, Application(_: Variable, _: Variable)) => display(Nothing, e)
