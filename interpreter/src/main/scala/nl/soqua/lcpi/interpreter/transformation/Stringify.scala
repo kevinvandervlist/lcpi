@@ -11,6 +11,8 @@ object Stringify {
 
   implicit def expression2String(e: Expression): String = Stringify(e)
 
+  def apply(e: Expression): String = display(Nothing, e)
+
   private sealed trait ExpressionType
 
   private case object Function extends ExpressionType
@@ -20,9 +22,7 @@ object Stringify {
   // Mark the parent as nothing special
   private case object Nothing extends ExpressionType
 
-  def apply(e: Expression): String = display(Nothing, e)
-
-  def display(parent: ExpressionType, e: Expression): ShowS = (parent, e) match {
+  private def display(parent: ExpressionType, e: Expression): ShowS = (parent, e) match {
     case (Function, LambdaAbstraction(_, _)) => parenthesize(display(Nothing, e))
     case (_, LambdaAbstraction(x, a)) => char('λ') compose display(Nothing, x) compose char('.') compose display(Nothing, a)
     case (Function, Application(_: Variable, _: Variable)) => display(Nothing, e)
