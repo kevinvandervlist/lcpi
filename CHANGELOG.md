@@ -1,5 +1,5 @@
 <a name="1.0.4"></a>
-# [1.0.4](https://github.com/kevinvandervlist/lcpi/compare/v1.0.2...v1.0.3) (????-??-??)
+# [1.0.4](https://github.com/kevinvandervlist/lcpi/compare/v1.0.3...v1.0.4) (????-??-??)
 
 ### Bug Fixes
 
@@ -7,7 +7,7 @@
 
 ### Features
 
-* 
+* [#9](https://github.com/kevinvandervlist/lcpi/pull/9) Add a toggle to enable ascii-mode support for simple terminals.
 
 
 <a name="1.0.3"></a>

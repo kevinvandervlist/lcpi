@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/kevinvandervlist/lcpi.svg?branch=master)](https://travis-ci.org/kevinvandervlist/lcpi)
 [![Coverage Status](https://coveralls.io/repos/github/kevinvandervlist/lcpi/badge.svg)](https://coveralls.io/github/kevinvandervlist/lcpi)
+[![BCH compliance](https://bettercodehub.com/edge/badge/kevinvandervlist/lcpi)](https://bettercodehub.com/)
 
 This provides a parser and interpreter and REPL for the untyped lambda calculus. 
 The REPL has tracing capabilities to show all intermediate reduction steps.
